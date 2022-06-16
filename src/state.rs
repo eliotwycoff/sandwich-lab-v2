@@ -17,6 +17,7 @@ pub struct AppState {
 pub struct Blockchain {
     pub name: String,
     pub provider_url: String,
+    pub data_aggregator_address: String,
     pub exchanges: HashMap<String, Exchange>
 }
 
@@ -54,7 +55,10 @@ fn init_blockchains() -> HashMap<String, Blockchain> {
             "ethereum".to_string(), 
             Blockchain { 
                 name: "Ethereum".to_string(), 
-                provider_url: env::var("ETHEREUM_URL").expect("error reading provider url"),
+                provider_url: env::var("ETHEREUM_URL")
+                    .expect("error reading provider url"),
+                data_aggregator_address: env::var("ETHEREUM_DATA_AGGREGATOR")
+                    .expect("error reading data aggregator address"),
                 exchanges: HashMap::from([
                     (
                         "uniswapv2".to_string(),
@@ -75,7 +79,10 @@ fn init_blockchains() -> HashMap<String, Blockchain> {
             "moonriver".to_string(),
             Blockchain {
                 name: "Moonriver".to_string(),
-                provider_url: env::var("MOONRIVER_URL").expect("error reading provider url"),
+                provider_url: env::var("MOONRIVER_URL")
+                    .expect("error reading provider url"),
+                data_aggregator_address: env::var("MOONRIVER_DATA_AGGREGATOR")
+                    .expect("error reading data aggregator address"),
                 exchanges: HashMap::from([
                     (
                         "solarbeam".to_string(),
