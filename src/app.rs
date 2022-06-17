@@ -35,11 +35,32 @@ async fn pair_profile(
         Some(blockchain) => {
             match blockchain.exchanges.get(&exchange_name.to_lowercase()) {
                 Some(exchange) => {
-                    HttpResponse::Ok().body(templates::pair::render(
-                        &app_name,
-                        &blockchain.name,
-                        exchange.name(),
-                        &pair_address))
+                    // temporary code -- should put this in the api and fetch dynamically
+                    match crate::evm::fetch_pair_metadata(
+                        &blockchain.provider_url,
+                        &pair_address,
+                        &blockchain.data_aggregator_address).await {
+
+                        Ok(metadata) => {
+                            HttpResponse::Ok().body(templates::pair::render(
+                                &app_name,
+                                &blockchain.name,
+                                exchange.name(),
+                                &pair_address,
+                                &metadata.base_name,
+                                &metadata.base_symbol,
+                                &metadata.base_address,
+                                metadata.base_decimals,
+                                &metadata.quote_name,
+                                &metadata.quote_symbol,
+                                &metadata.quote_address,
+                                metadata.quote_decimals)) 
+                        },
+                        Err(e) => {
+                            println!("{e:?}");
+                            render_not_found(&home_url)
+                        }
+                    }
                 },
                 None => render_not_found(&home_url)
             }
@@ -63,7 +84,7 @@ fn render_not_found(home_url: &str) -> HttpResponse {
 // that can be registered on startup in main.rs.
 pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
-        web::scope("/")
+        web::scope("")
         .service(index)
         .service(pair_profile)
         .default_service(web::route().to(not_found)));

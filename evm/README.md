@@ -1,15 +1,5 @@
-# Basic Sample Hardhat Project
+# DataAggregator Helper Contract
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
+The DataAggregator contract can be used to fetch the token metadata for a given Uniswap V2 or V3 pair address in just one RPC call.
 
-Try running some of the following tasks:
-
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-node scripts/sample-script.js
-npx hardhat help
-```
+This submodule of Sandwich Lab V2 contains the contract itself, a deployment script, an example script and a testing script.
