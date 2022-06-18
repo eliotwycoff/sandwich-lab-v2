@@ -25,9 +25,9 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(app_state.clone())
             .wrap(middleware::NormalizePath::trim())
-            .service(Files::new("/static/css", "./static/css").show_files_listing())
-            .configure(app::routes)
+            .service(Files::new("/static", "./static").show_files_listing())
             .configure(api::routes)
+            .configure(app::routes)
     })
     .bind(("127.0.0.1", 8080))?
     .run()

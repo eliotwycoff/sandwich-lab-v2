@@ -27,8 +27,8 @@ pub fn init_db_pool() -> Pool {
 pub fn fetch_token_by_params(
     db_connection: &DbConnection,
     blockchain_nm: &str,
-    token_addr: &str) -> Result<Option<Token>, DbError> {
-
+    token_addr: &str
+) -> Result<Option<Token>, DbError> {
     use crate::api::schema::tokens::dsl::*;
 
     let token = tokens
@@ -44,8 +44,8 @@ pub fn fetch_token_by_params(
 // or return Ok(None)
 pub fn fetch_token_by_id(
     db_connection: &DbConnection,
-    tid: i32) -> Result<Option<Token>, DbError> {
-
+    tid: i32
+) -> Result<Option<Token>, DbError> {
     use crate::api::schema::tokens::dsl::*;
 
     let token = tokens
@@ -64,8 +64,8 @@ pub fn insert_token(
     token_sym: &str,
     token_dec: i16,
     blockchain_nm: &str,
-    token_addr: &str) -> Result<i32, DbError> {
-
+    token_addr: &str
+) -> Result<i32, DbError> {
     use crate::api::schema::tokens::dsl::*;
 
     let values = (
@@ -87,15 +87,15 @@ pub fn insert_token(
 pub fn fetch_pair_by_params(
     db_connection: &DbConnection, 
     blockchain_nm: &str, 
-    pair_addr: &str) -> Result<Option<Pair>, DbError> {
-
+    pair_addr: &str
+) -> Result<Option<Pair>, DbError> {
     use crate::api::schema::pairs::dsl::*;
 
     let pair = pairs
         .filter(pair_address.eq(pair_addr.to_lowercase()))
         .filter(blockchain_name.eq(blockchain_nm.to_lowercase()))
-        .first(db_connection)
-        .optional()?;
+        .first(db_connection) // returns Ok(record) if found else Err(NotFound)
+        .optional()?; // converts Err(NotFound) into Ok(None)
 
     Ok(pair)
 }
@@ -104,8 +104,8 @@ pub fn fetch_pair_by_params(
 // or return Ok(None).
 pub fn fetch_pair_by_id(
     db_connection: &DbConnection,
-    pid: i32) -> Result<Option<Pair>, DbError> {
-
+    pid: i32
+) -> Result<Option<Pair>, DbError> {
     use crate::api::schema::pairs::dsl::*;
 
     let pair = pairs
@@ -124,8 +124,8 @@ pub fn insert_pair(
     exchange_nm: &str,
     pair_addr: &str,
     base_id: i32,
-    quote_id: i32) -> Result<i32, DbError> {
-
+    quote_id: i32
+) -> Result<i32, DbError> {
     use crate::api::schema::pairs::dsl::*;
 
     let values = (
@@ -148,8 +148,8 @@ pub fn fetch_all_sandwiches_by_params(
     db_connection: &DbConnection,
     pid: i32,
     min_ge_block: Option<i64>,
-    max_le_block: Option<i64>) -> Result<Vec<Sandwich>, DbError> {
-
+    max_le_block: Option<i64>
+) -> Result<Vec<Sandwich>, DbError> {
     use crate::api::schema::sandwiches::dsl::*;
 
     let base_query = sandwiches.filter(pair_id.eq(pid));
@@ -183,8 +183,8 @@ pub fn fetch_all_sandwiches_by_params(
 // or return Ok(None).
 pub fn fetch_sandwich_by_id(
     db_connection: &DbConnection,
-    sid: i64) -> Result<Option<Sandwich>, DbError> {
-
+    sid: i64
+) -> Result<Option<Sandwich>, DbError> {
     use crate::api::schema::sandwiches::dsl::*;
 
     let sandwich = sandwiches

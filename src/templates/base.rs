@@ -12,10 +12,11 @@ pub fn wrap_in_html(head_content: &str, body_content: &str, script_content: &str
                 <title>{{title}}</title>
                 <meta name="description" content="">
                 <meta name="viewport" content="width=device-width, initial-scale=1">
-                <link rel="preconnect" href="https://fonts.googleapis.com">
-                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-                <link href="https://fonts.googleapis.com/css2?family=Dosis:wght@400;700&family=Special+Elite&display=swap" rel="stylesheet"> 
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>                
+                <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Dosis:wght@200;400;600&family=Special+Elite&display=swap">
+                <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dosis:wght@200;400;600&family=Special+Elite&display=swap" media="print" onload="this.media='all'">
                 <link rel="stylesheet" href="/static/css/base.css">
+                <script src="/static/js/client.js"></script>
         "##;
 
     // Links to static assets go here as "head_content".
@@ -34,11 +35,15 @@ pub fn wrap_in_html(head_content: &str, body_content: &str, script_content: &str
 
     let body_bottom = r##"
                 </div>
+                <script type="text/javascript">
+                    window.onload = async () => {
         "##;
 
     // JavaScript can go here as "script_content".
 
     let bottom = r##"
+                    };
+                </script>
             </body>
             </html>
         "##;

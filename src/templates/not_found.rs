@@ -4,17 +4,18 @@ use super::base::wrap_in_html;
 #[derive(Content)]
 pub struct NotFoundPage<'a> {
     title: &'a str,
+    message: &'a str,
     home_url: &'a str
 }
 
-pub fn render(title: &str, home_url: &str) -> String {
+pub fn render(title: &str, message: &str, home_url: &str) -> String {
     let head_content = r##"
 
     "##;
 
     let inner_content = r##"
         <h1 class="page-header">404 Not Found</h1>
-        <p>This isn't the content you're looking for. <a href="{{home_url}}">Return Home</a></p>
+        <p>{{message}} <a href="{{home_url}}">Return Home</a></p>
 
     "##;
 
@@ -27,6 +28,7 @@ pub fn render(title: &str, home_url: &str) -> String {
 
     template.render(&NotFoundPage {
         title,
+        message,
         home_url
     })
 }

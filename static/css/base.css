@@ -6,6 +6,7 @@ html, body {
     margin: 0;
     padding: 0;
     font-family: 'Dosis', sans-serif;
+    font-weight: 400;
 }
 
 ul {
@@ -17,10 +18,21 @@ a {
     color: black;
 }
 
-.page-header {
-    margin-top: 0.5em;
+.strong {
+    font-weight: 600;
+}
+
+.page-title {
     text-align: center;
     font-family: 'Special Elite', cursive;
+}
+
+.page-title, .placeholder--title {
+    margin: 0.5em auto;
+}
+
+.section-title {
+    font-weight: 200;
 }
 
 .container {
@@ -28,4 +40,40 @@ a {
     max-width: 800px;
     margin: 0 auto;
     padding: 1em;
+}
+
+.card {
+    box-shadow: -2px 2px 5px 5px gainsboro;
+}
+
+.col {
+    display: flex;
+    flex-direction: column;
+}
+
+.placeholder {
+    background-color: gainsboro;
+    border-radius: 0.65em;
+
+    animation-duration: 1.65s;
+    animation-fill-mode: forwards;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
+    animation-name: animatePlaceholder;
+    background: linear-gradient(to right, #eee 2%, #ddd 18%, #eee 33%);
+    background-size: 1600px;
+}
+
+.placeholder--title {
+    width: 60%;
+    height: 2.35em;
+}
+
+@keyframes animatePlaceholder {
+    0% { 
+        background-position: -800px 0; 
+    }
+    100% {
+        background-position: 800px 0;
+    }
 }

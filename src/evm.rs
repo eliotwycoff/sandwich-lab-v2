@@ -34,6 +34,8 @@ impl From<Metadata> for PairMetadata {
     }
 }
 
+// Fetches the pair (and base and quote token) metadata
+// from the blockchain via the DataAggregator contract.
 pub async fn fetch_pair_metadata(
     provider_url: &str, 
     pair_address: &str,

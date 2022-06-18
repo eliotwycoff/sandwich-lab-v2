@@ -32,7 +32,6 @@ pub struct Pair {
     pub quote_token_id: i32,
     pub latest_scanned_block: Option<i64>,
     pub earliest_scanned_block: Option<i64>,
-    pub deployment_block: Option<i64>,
     pub scanning_latest: bool,
     pub scanning_previous: bool
 }

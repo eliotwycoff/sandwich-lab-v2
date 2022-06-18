@@ -18,7 +18,6 @@ CREATE TABLE pairs (
     quote_token_id INT NOT NULL REFERENCES tokens (token_id) ON DELETE CASCADE,
     latest_scanned_block BIGINT,
     earliest_scanned_block BIGINT,
-    deployment_block BIGINT,
     scanning_latest BOOLEAN NOT NULL DEFAULT 'f',
     scanning_previous BOOLEAN NOT NULL DEFAULT 'f',
     UNIQUE (blockchain_name, pair_address)

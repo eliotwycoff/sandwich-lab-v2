@@ -35,7 +35,6 @@ table! {
         quote_token_id -> Int4,
         latest_scanned_block -> Nullable<Int8>,
         earliest_scanned_block -> Nullable<Int8>,
-        deployment_block -> Nullable<Int8>,
         scanning_latest -> Bool,
         scanning_previous -> Bool,
     }
