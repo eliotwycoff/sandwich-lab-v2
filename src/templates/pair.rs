@@ -30,10 +30,13 @@ pub fn render(
         <div id="page-title-placeholder" class="placeholder placeholder--title"></div>
         <section id="pair-metadata" class="card col">
             <div class="section-label">
-                <span>{{exchange_name}} on {{blockchain_name}}<br>Pair {{pair_address}}</span>
+                <span>Pair {{pair_address}} on </span>
+                <span class="strong">{{exchange_name}} / {{blockchain_name}}</span>
             </div>
-            <div id="base-placeholder" class="placeholder placeholder--text"></div>
-            <div id="quote-placeholder" class="placeholder placeholder--text"></div>
+            <div class="section-body">
+                <div id="base-placeholder" class="placeholder placeholder--text"></div>
+                <div id="quote-placeholder" class="placeholder placeholder--text"></div>
+            </div>
         </section>
     "##;
 
@@ -48,11 +51,45 @@ pub fn render(
         const response = await fetch(apiEndpoint);
         const data = await response.json();
         
-        const titlePlaceholder = document.querySelector("#page-title-placeholder");
         const title = document.createElement("h1");
         title.className = "page-title";
         title.textContent = `${data.base.symbol}-${data.quote.symbol}`;
+        const titlePlaceholder = document.querySelector("#page-title-placeholder");
         titlePlaceholder.replaceWith(title);
+
+        const base = document.createElement("div");
+        base.className = "token-metadata";
+        const baseName = document.createElement("span");
+        const baseSymbol = document.createElement("span");
+        const baseAddress = document.createElement("span");
+        baseName.className = "token-name strong";
+        baseSymbol.className = "token-symbol";
+        baseAddress.className = "token-address";
+        baseName.textContent = ` · ${data.base.name} `;
+        baseSymbol.textContent = `(${data.base.symbol})`;
+        baseAddress.textContent = ` at ${data.base.address}`;
+        base.appendChild(baseName);
+        base.appendChild(baseSymbol);
+        base.appendChild(baseAddress);
+        const basePlaceholder = document.querySelector("#base-placeholder");
+        basePlaceholder.replaceWith(base);
+        
+        const quote = document.createElement("div");
+        quote.className = "token-metadata";
+        const quoteName = document.createElement("span");
+        const quoteSymbol = document.createElement("span");
+        const quoteAddress = document.createElement("span");
+        quoteName.className = "token-name strong";
+        quoteSymbol.className = "token-symbol";
+        quoteAddress.className = "token-address";
+        quoteName.textContent = ` · ${data.quote.name} `;
+        quoteSymbol.textContent = `(${data.quote.symbol})`;
+        quoteAddress.textContent = ` at ${data.quote.address}`;
+        quote.appendChild(quoteName);
+        quote.appendChild(quoteSymbol);
+        quote.appendChild(quoteAddress);
+        const quotePlaceholder = document.querySelector("#quote-placeholder");
+        quotePlaceholder.replaceWith(quote);
     "##;
 
     let source = wrap_in_html(head_content, inner_content, script_content);

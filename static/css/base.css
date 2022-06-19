@@ -28,7 +28,11 @@ a {
 }
 
 .page-title, .placeholder--title {
-    margin: 0.5em auto;
+    margin: 1rem auto;
+}
+
+.token-metadata, .placeholder--text {
+    margin-top: 0.1em;
 }
 
 .section-title {
@@ -37,18 +41,29 @@ a {
 
 .container {
     width: 80%;
-    max-width: 800px;
+    max-width: 650px;
     margin: 0 auto;
     padding: 1em;
 }
 
 .card {
-    box-shadow: -2px 2px 5px 5px gainsboro;
+    border: 2px solid black;
+    box-shadow: -1px 1px 5px 1px gainsboro;
 }
 
 .col {
     display: flex;
     flex-direction: column;
+}
+
+.section-label {
+    color: white;
+    background-color: black;
+    padding: 0.4em;
+}
+
+.section-body {
+    padding: 0.4em;
 }
 
 .placeholder {
@@ -61,12 +76,17 @@ a {
     animation-timing-function: ease-in-out;
     animation-name: animatePlaceholder;
     background: linear-gradient(to right, #eee 2%, #ddd 18%, #eee 33%);
-    background-size: 1600px;
+    background-size: 1300px;
 }
 
 .placeholder--title {
-    width: 60%;
-    height: 2.35em;
+    width: 65%;
+    height: 2.4em;
+}
+
+.placeholder--text {
+    width: 100%;
+    height: 1.28em;
 }
 
 @keyframes animatePlaceholder {

@@ -8,6 +8,7 @@ use std::convert::From;
 type RpcError = Box<dyn std::error::Error + Send + Sync>;
 type Metadata = (Address, String, String, u8, Address, String, String, u8);
 
+#[derive(Debug, Clone)]
 pub struct PairMetadata {
     pub base_address: String,
     pub quote_address: String,

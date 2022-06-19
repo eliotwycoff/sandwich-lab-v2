@@ -1,5 +1,6 @@
 use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
+use diesel::result::Error as DbError;
 use std::env;
 use r2d2;
 use super::models::{ 
@@ -10,7 +11,6 @@ use super::models::{
     LunchmeatTransaction, 
     BackrunTransaction };
 
-type DbError = Box<dyn std::error::Error + Send + Sync>;
 pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 pub type DbConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
 
@@ -28,16 +28,13 @@ pub fn fetch_token_by_params(
     db_connection: &DbConnection,
     blockchain_nm: &str,
     token_addr: &str
-) -> Result<Option<Token>, DbError> {
+) -> Result<Token, DbError> {
     use crate::api::schema::tokens::dsl::*;
 
-    let token = tokens
+    tokens
         .filter(token_address.eq(token_addr.to_lowercase()))
         .filter(blockchain_name.eq(blockchain_nm.to_lowercase()))
         .first(db_connection)
-        .optional()?;
-
-    Ok(token)
 }
 
 // Fetch the token with the given token_id,
@@ -45,15 +42,12 @@ pub fn fetch_token_by_params(
 pub fn fetch_token_by_id(
     db_connection: &DbConnection,
     tid: i32
-) -> Result<Option<Token>, DbError> {
+) -> Result<Token, DbError> {
     use crate::api::schema::tokens::dsl::*;
 
-    let token = tokens
+    tokens
         .find(tid)
         .first(db_connection)
-        .optional()?;
-
-    Ok(token)
 }
 
 // Take the parameters for a new token;
@@ -88,16 +82,13 @@ pub fn fetch_pair_by_params(
     db_connection: &DbConnection, 
     blockchain_nm: &str, 
     pair_addr: &str
-) -> Result<Option<Pair>, DbError> {
+) -> Result<Pair, DbError> {
     use crate::api::schema::pairs::dsl::*;
 
-    let pair = pairs
+    pairs
         .filter(pair_address.eq(pair_addr.to_lowercase()))
         .filter(blockchain_name.eq(blockchain_nm.to_lowercase()))
         .first(db_connection) // returns Ok(record) if found else Err(NotFound)
-        .optional()?; // converts Err(NotFound) into Ok(None)
-
-    Ok(pair)
 }
 
 // Fetch the pair with the given pair_id,
@@ -105,15 +96,12 @@ pub fn fetch_pair_by_params(
 pub fn fetch_pair_by_id(
     db_connection: &DbConnection,
     pid: i32
-) -> Result<Option<Pair>, DbError> {
+) -> Result<Pair, DbError> {
     use crate::api::schema::pairs::dsl::*;
 
-    let pair = pairs
+    pairs
         .find(pid)
         .first(db_connection)
-        .optional()?;
-    
-    Ok(pair)
 }
 
 // Take the parameters for a new pair;
@@ -184,13 +172,10 @@ pub fn fetch_all_sandwiches_by_params(
 pub fn fetch_sandwich_by_id(
     db_connection: &DbConnection,
     sid: i64
-) -> Result<Option<Sandwich>, DbError> {
+) -> Result<Sandwich, DbError> {
     use crate::api::schema::sandwiches::dsl::*;
 
-    let sandwich = sandwiches
+    sandwiches
         .find(sid)
         .first(db_connection)
-        .optional()?;
-
-    Ok(sandwich)
 }
