@@ -17,7 +17,7 @@ pub struct Token {
     pub token_name: String,
     pub token_symbol: String,
     pub decimals: i16,
-    pub blockchain_name: String,
+    pub blockchain_str_id: String,
     pub token_address: String
 }
 
@@ -25,8 +25,8 @@ pub struct Token {
 #[table_name = "pairs"]
 pub struct Pair {
     pub pair_id: i32,
-    pub blockchain_name: String,
-    pub exchange_name: String,
+    pub blockchain_str_id: String,
+    pub factory_address: String,
     pub pair_address: String,
     pub base_token_id: i32,
     pub quote_token_id: i32,

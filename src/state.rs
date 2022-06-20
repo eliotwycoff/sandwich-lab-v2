@@ -9,7 +9,7 @@ use crate::api::db;
 pub struct AppState {
     pub app_name: Mutex<String>,
     pub db_pool: db::Pool,
-    pub blockchains: HashMap<String, Blockchain>
+    pub blockchains: HashMap<String, Blockchain> // blockchain name (key) -> blockchain struct (value)
 }
 
 // Each blockchain that this application interacts with
@@ -18,7 +18,7 @@ pub struct Blockchain {
     pub name: String,
     pub provider_url: String,
     pub data_aggregator_address: String,
-    pub exchanges: HashMap<String, Exchange>
+    pub exchanges: HashMap<String, Exchange> // factory address (key) -> exchange enum (value)
 }
 
 // Each exchange that this application interacts with
@@ -61,15 +61,21 @@ fn init_blockchains() -> HashMap<String, Blockchain> {
                     .expect("error reading data aggregator address"),
                 exchanges: HashMap::from([
                     (
-                        "uniswapv2".to_string(),
+                        "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f".to_lowercase(),
                         Exchange::V2 {
                             name: "Uniswap V2".to_string()
                         }
                     ),
                     (
-                        "uniswapv3".to_string(),
+                        "0x1F98431c8aD98523631AE4a59f267346ea31F984".to_lowercase(),
                         Exchange::V3 {
                             name: "Uniswap V3".to_string()
+                        }
+                    ),
+                    (
+                        "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac".to_lowercase(),
+                        Exchange::V2 {
+                            name: "SushiSwap V2".to_string()
                         }
                     )
                 ])
@@ -85,7 +91,7 @@ fn init_blockchains() -> HashMap<String, Blockchain> {
                     .expect("error reading data aggregator address"),
                 exchanges: HashMap::from([
                     (
-                        "solarbeam".to_string(),
+                        "0x049581aEB6Fe262727f290165C29BDAB065a1B68".to_lowercase(),
                         Exchange::V2 {
                             name: "Solarbeam".to_string()
                         }

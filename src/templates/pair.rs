@@ -5,9 +5,7 @@ use super::base::wrap_in_html;
 struct PairProfile<'a> {
     title: &'a str,
     blockchain_name: &'a str,
-    blockchain_id_str: &'a str,
-    exchange_name: &'a str,
-    exchange_id_str: &'a str,
+    blockchain_str_id: &'a str,
     pair_address: &'a str,
     api_url: &'a str
 }
@@ -15,9 +13,7 @@ struct PairProfile<'a> {
 pub fn render(
     title: &str,
     blockchain_name: &str,
-    blockchain_id_str: &str,
-    exchange_name: &str,
-    exchange_id_str: &str,
+    blockchain_str_id: &str,
     pair_address: &str,
     api_url: &str
 ) -> String {
@@ -31,7 +27,8 @@ pub fn render(
         <section id="pair-metadata" class="card col">
             <div class="section-label">
                 <span>Pair {{pair_address}} on </span>
-                <span class="strong">{{exchange_name}} / {{blockchain_name}}</span>
+                <span class="strong"> {{blockchain_name}}</span>
+                <span id="section-label__exchange"></span>
             </div>
             <div class="section-body">
                 <div id="base-placeholder" class="placeholder placeholder--text"></div>
@@ -42,14 +39,17 @@ pub fn render(
 
     let script_content = r##"
         const params = new URLSearchParams({
-            blockchain: "{{blockchain_id_str}}",
-            exchange: "{{exchange_id_str}}",
+            blockchain: "{{blockchain_str_id}}",
             pair_address: "{{pair_address}}"
         });
 
         const apiEndpoint = `{{api_url}}?${params.toString()}`;
         const response = await fetch(apiEndpoint);
         const data = await response.json();
+
+        setElement("section-label__exchange", (element) => {
+            element.textContent = `(${data.pair.exchange_name})`;
+        });
         
         const title = document.createElement("h1");
         title.className = "page-title";
@@ -98,9 +98,7 @@ pub fn render(
     template.render(&PairProfile {
         title,
         blockchain_name,
-        blockchain_id_str,
-        exchange_name,
-        exchange_id_str,
+        blockchain_str_id,
         pair_address,
         api_url
     })

@@ -6,10 +6,11 @@ use std::sync::{ Arc };
 use std::convert::From;
 
 type RpcError = Box<dyn std::error::Error + Send + Sync>;
-type Metadata = (Address, String, String, u8, Address, String, String, u8);
+type Metadata = (Address, Address, String, String, u8, Address, String, String, u8);
 
 #[derive(Debug, Clone)]
 pub struct PairMetadata {
+    pub factory_address: String,
     pub base_address: String,
     pub quote_address: String,
     pub base_name: String,
@@ -23,14 +24,15 @@ pub struct PairMetadata {
 impl From<Metadata> for PairMetadata {
     fn from(metadata: Metadata) -> Self {
         Self {
-            base_address: hex::encode(metadata.0),
-            quote_address: hex::encode(metadata.4),
-            base_name: metadata.1,
-            quote_name: metadata.5,
-            base_symbol: metadata.2,
-            quote_symbol: metadata.6,
-            base_decimals: metadata.3,
-            quote_decimals: metadata.7
+            factory_address: hex::encode(metadata.0).to_lowercase(),
+            base_address: hex::encode(metadata.1).to_lowercase(),
+            quote_address: hex::encode(metadata.5).to_lowercase(),
+            base_name: metadata.2,
+            quote_name: metadata.6,
+            base_symbol: metadata.3,
+            quote_symbol: metadata.7,
+            base_decimals: metadata.4,
+            quote_decimals: metadata.8
         }
     }
 }
@@ -44,7 +46,7 @@ pub async fn fetch_pair_metadata(
 ) -> Result<PairMetadata, RpcError> {
 
     let data_aggregator_abi = AbiParser::default().parse_str(r#"[
-        function getTokenMetadata(address) external view returns (address, string, string, uint8, address, string, string, uint8)
+        function getMetadata(address) external view returns (address, address, string, string, uint8, address, string, string, uint8)
     ]"#).unwrap();
 
     let provider = Provider::<Http>::try_from(provider_url)?;
@@ -55,7 +57,7 @@ pub async fn fetch_pair_metadata(
         Arc::clone(&client));
 
     let metadata = contract
-        .method::<_, Metadata>("getTokenMetadata", pair_address.parse::<Address>()?)?
+        .method::<_, Metadata>("getMetadata", pair_address.parse::<Address>()?)?
         .call()
         .await?;
 

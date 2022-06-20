@@ -4,15 +4,15 @@ CREATE TABLE tokens (
     token_name VARCHAR (64) NOT NULL,
     token_symbol VARCHAR (16) NOT NULL,
     decimals SMALLINT NOT NULL,
-    blockchain_name VARCHAR (32) NOT NULL,
+    blockchain_str_id VARCHAR (32) NOT NULL,
     token_address CHAR (42) NOT NULL,
-    UNIQUE (blockchain_name, token_address)
+    UNIQUE (blockchain_str_id, token_address)
 );
 
 CREATE TABLE pairs (
     pair_id SERIAL PRIMARY KEY,
-    blockchain_name VARCHAR (32) NOT NULL,
-    exchange_name VARCHAR (32) NOT NULL,
+    blockchain_str_id VARCHAR (32) NOT NULL,
+    factory_address CHAR (42) NOT NULL,
     pair_address CHAR (42) NOT NULL,
     base_token_id INT NOT NULL REFERENCES tokens (token_id) ON DELETE CASCADE,
     quote_token_id INT NOT NULL REFERENCES tokens (token_id) ON DELETE CASCADE,
@@ -20,7 +20,7 @@ CREATE TABLE pairs (
     earliest_scanned_block BIGINT,
     scanning_latest BOOLEAN NOT NULL DEFAULT 'f',
     scanning_previous BOOLEAN NOT NULL DEFAULT 'f',
-    UNIQUE (blockchain_name, pair_address)
+    UNIQUE (blockchain_str_id, pair_address)
 );
 
 CREATE TABLE sandwiches (

@@ -22,31 +22,22 @@ async fn index(data: web::Data<AppState>) -> impl Responder {
 }
 
 // Serve a page for a given pair, if it exists.
-#[get("/{blockchain_name}/{exchange_name}/{pair_address}")]
+#[get("/{blockchain_str_id}/{pair_address}")]
 async fn pair_profile(
     data: web::Data<AppState>,
     req: HttpRequest,
-    path: web::Path<(String, String, String)>) -> impl Responder {
+    path: web::Path<(String, String)>) -> impl Responder {
 
     let app_name = data.app_name.lock().unwrap();
     let home_url = req.url_for_static("index").unwrap().to_string();
-    let (blockchain_name, exchange_name, pair_address) = path.into_inner();
+    let (blockchain_str_id, pair_address) = path.into_inner();
 
-    let blockchain_id_str = blockchain_name.to_lowercase();
-    let blockchain = match data.blockchains.get(&blockchain_id_str) {
+    let blockchain_str_id = blockchain_str_id.to_lowercase();
+    let blockchain = match data.blockchains.get(&blockchain_str_id) {
         Some(blockchain) => blockchain,
         None => {
             let message = "Did you specify a valid blockchain?".to_string();
             return render_not_found(&message, &home_url); 
-        }
-    };
-
-    let exchange_id_str = exchange_name.to_lowercase();
-    let exchange = match blockchain.exchanges.get(&exchange_id_str) {
-        Some(exchange) => exchange,
-        None => {
-            let message = "Did you specify a valid exchange?".to_string();
-            return render_not_found(&message, &home_url);
         }
     };
 
@@ -56,9 +47,7 @@ async fn pair_profile(
     HttpResponse::Ok().body(templates::pair::render(
         &app_name,
         &blockchain.name,
-        &blockchain_id_str,
-        exchange.name(),
-        &exchange_id_str,
+        &blockchain_str_id,
         &pair_address,
         &api_url))
 } 

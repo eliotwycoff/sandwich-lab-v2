@@ -26,14 +26,14 @@ pub fn init_db_pool() -> Pool {
 // or return Ok(None).
 pub fn fetch_token_by_params(
     db_connection: &DbConnection,
-    blockchain_nm: &str,
+    blockchain_id: &str,
     token_addr: &str
 ) -> Result<Token, DbError> {
     use crate::api::schema::tokens::dsl::*;
 
     tokens
         .filter(token_address.eq(token_addr.to_lowercase()))
-        .filter(blockchain_name.eq(blockchain_nm.to_lowercase()))
+        .filter(blockchain_str_id.eq(blockchain_id.to_lowercase()))
         .first(db_connection)
 }
 
@@ -57,7 +57,7 @@ pub fn insert_token(
     token_nm: &str,
     token_sym: &str,
     token_dec: i16,
-    blockchain_nm: &str,
+    blockchain_id: &str,
     token_addr: &str
 ) -> Result<i32, DbError> {
     use crate::api::schema::tokens::dsl::*;
@@ -66,7 +66,7 @@ pub fn insert_token(
         token_name.eq(token_nm),
         token_symbol.eq(token_sym),
         decimals.eq(token_dec),
-        blockchain_name.eq(blockchain_nm.to_lowercase()),
+        blockchain_str_id.eq(blockchain_id.to_lowercase()),
         token_address.eq(token_addr.to_lowercase())
     );
 
@@ -80,14 +80,14 @@ pub fn insert_token(
 // or return Ok(None).
 pub fn fetch_pair_by_params(
     db_connection: &DbConnection, 
-    blockchain_nm: &str, 
+    blockchain_id: &str, 
     pair_addr: &str
 ) -> Result<Pair, DbError> {
     use crate::api::schema::pairs::dsl::*;
 
     pairs
         .filter(pair_address.eq(pair_addr.to_lowercase()))
-        .filter(blockchain_name.eq(blockchain_nm.to_lowercase()))
+        .filter(blockchain_str_id.eq(blockchain_id.to_lowercase()))
         .first(db_connection) // returns Ok(record) if found else Err(NotFound)
 }
 
@@ -108,8 +108,8 @@ pub fn fetch_pair_by_id(
 // then insert it and return the new pair_id.
 pub fn insert_pair(
     db_connection: &DbConnection,
-    blockchain_nm: &str,
-    exchange_nm: &str,
+    blockchain_id: &str,
+    factory_addr: &str,
     pair_addr: &str,
     base_id: i32,
     quote_id: i32
@@ -117,8 +117,8 @@ pub fn insert_pair(
     use crate::api::schema::pairs::dsl::*;
 
     let values = (
-        blockchain_name.eq(blockchain_nm.to_lowercase()),
-        exchange_name.eq(exchange_nm.to_lowercase()),
+        blockchain_str_id.eq(blockchain_id.to_lowercase()),
+        factory_address.eq(factory_addr.to_lowercase()),
         pair_address.eq(pair_addr.to_lowercase()),
         base_token_id.eq(base_id),
         quote_token_id.eq(quote_id)

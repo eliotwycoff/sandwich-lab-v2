@@ -28,8 +28,8 @@ table! {
 table! {
     pairs (pair_id) {
         pair_id -> Int4,
-        blockchain_name -> Varchar,
-        exchange_name -> Varchar,
+        blockchain_str_id -> Varchar,
+        factory_address -> Bpchar,
         pair_address -> Bpchar,
         base_token_id -> Int4,
         quote_token_id -> Int4,
@@ -54,7 +54,7 @@ table! {
         token_name -> Varchar,
         token_symbol -> Varchar,
         decimals -> Int2,
-        blockchain_name -> Varchar,
+        blockchain_str_id -> Varchar,
         token_address -> Bpchar,
     }
 }
