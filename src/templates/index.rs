@@ -19,7 +19,7 @@ pub fn render(title: &str, exchanges: Vec<Exchange>) -> String {
     "##;
 
     let inner_content = r##"
-        <h1 class="page-header">{{title}}</h1>
+        <h1 class="page-title">{{title}}</h1>
         <p>Which exchange would you like to explore?</p>
         <ul>
             {{#exchanges}}

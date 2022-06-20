@@ -142,8 +142,8 @@
       ]
     },
     "/Users/eliotwycoff/Workspace/Development/Web3Coursework/Bootcamp/Final/Sandwich-Lab-V2/sandwich-lab-v2/evm/contracts/DataAggregator.sol": {
-      "lastModificationDate": 1655375322919,
-      "contentHash": "f076f34756c7c14e136c1524ebfe2016",
+      "lastModificationDate": 1655650229655,
+      "contentHash": "e38454d77c06ade96ed004de0d23ceb4",
       "sourceName": "contracts/DataAggregator.sol",
       "solcConfig": {
         "version": "0.8.4",
@@ -169,8 +169,7 @@
         }
       },
       "imports": [
-        "./@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol",
-        "./@uniswap/v2-core/contracts/interfaces/IUniswapV2ERC20.sol"
+        "./DataUtils.sol"
       ],
       "versionPragmas": [
         "^0.8.4"
@@ -473,6 +472,41 @@
       ],
       "artifacts": [
         "ERC20"
+      ]
+    },
+    "/Users/eliotwycoff/Workspace/Development/Web3Coursework/Bootcamp/Final/Sandwich-Lab-V2/sandwich-lab-v2/evm/contracts/DataUtils.sol": {
+      "lastModificationDate": 1655650316929,
+      "contentHash": "0390061057d1da769f0626522ba2acab",
+      "sourceName": "contracts/DataUtils.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "DataUtils"
       ]
     }
   }
