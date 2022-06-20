@@ -6,6 +6,18 @@ use crate::templates;
 #[get("/")]
 async fn index(data: web::Data<AppState>) -> impl Responder {
     let app_name = data.app_name.lock().unwrap();
+
+    
+
+
+
+
+
+
+
+
+
+
     let mut exchanges = Vec::new();
 
     // temporary code -- requires changing
