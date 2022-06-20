@@ -1,4 +1,4 @@
-/evm/node_modules/
+/data_aggregator/node_modules/
 /target
 .env
 .DS_Store
