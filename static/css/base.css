@@ -28,7 +28,7 @@ a {
 }
 
 .page-title, .placeholder--title {
-    margin: 1rem auto;
+    margin: 3rem auto 1rem;
 }
 
 .token-metadata, .placeholder--text {
@@ -44,6 +44,82 @@ a {
     max-width: 650px;
     margin: 0 auto;
     padding: 1em;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5em 0;
+}
+
+.options__list {
+    width: 50%;
+    text-align: center;
+    margin-top: 0;
+}
+
+.options__item + .options__item {
+    margin: 1rem 0 0 0;
+}
+
+.options__item__input {
+    display: none;
+}
+
+.options__item__input:checked + .options__item__label {
+    background-color: gainsboro;
+    box-shadow: -1px 1px 5px 1px darkgray;
+}
+
+.options__item__label {
+    display: block;
+    width: 100%;
+    font-weight: 600;
+    padding: 0.5rem;
+    cursor: pointer;
+    border: 2px solid black;
+    box-shadow: -1px 1px 5px 1px gainsboro;
+    transition-duration: 100ms;
+}
+
+.options__item__label:hover {
+    background-color: gainsboro;
+}
+
+.options__pair__address {
+    font-family: 'Dosis', sans-serif;
+    padding: 0.75em 0.5em;
+    margin: 0 0 1em 0;
+    width: 50%;
+    border: 1px solid gainsboro;
+    border-radius: 0.25em;
+}
+
+.options__pair__address:focus {
+    outline: none;
+}
+
+.options__button {
+    font-family: 'Dosis', sans-serif;
+    font-weight: 400;
+    color: white;
+    background-color: gainsboro;
+    padding: 0.5rem 1rem;
+    margin: 0.8em 0 0 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: -1px 1px 5px 1px gainsboro;
+    transition-duration: 100ms;
+}
+
+.options:valid .options__button {
+    cursor: pointer;
+    background-color: black;
+}
+
+.options:valid .options__button:hover {
+    box-shadow: -1px 1px 5px 1px darkgray;
 }
 
 .card {

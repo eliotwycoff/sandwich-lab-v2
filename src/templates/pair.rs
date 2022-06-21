@@ -7,7 +7,8 @@ struct PairProfile<'a> {
     blockchain_name: &'a str,
     blockchain_str_id: &'a str,
     pair_address: &'a str,
-    api_url: &'a str
+    api_url: &'a str,
+    home_url: &'a str
 }
 
 pub fn render(
@@ -15,15 +16,17 @@ pub fn render(
     blockchain_name: &str,
     blockchain_str_id: &str,
     pair_address: &str,
-    api_url: &str
+    api_url: &str,
+    home_url: &str
 ) -> String {
 
     let head_content = r##"
-
+    
     "##;
 
     let inner_content = r##"
         <div id="page-title-placeholder" class="placeholder placeholder--title"></div>
+        <p>⇦ <a href={{home_url}} title="Home">Inspect a Different Pair</a></p>
         <section id="pair-metadata" class="card col">
             <div class="section-label">
                 <span>Pair {{pair_address}} on </span>
@@ -100,6 +103,7 @@ pub fn render(
         blockchain_name,
         blockchain_str_id,
         pair_address,
-        api_url
+        api_url,
+        home_url
     })
 }
