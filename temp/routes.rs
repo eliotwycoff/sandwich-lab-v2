@@ -2,8 +2,8 @@ use actix_web::{ get, web, HttpResponse, Responder };
 use serde::{ Serialize, Deserialize };
 use diesel::NotFound;
 use crate::state::AppState;
-use crate::evm;
-use super::{ db };
+use super::evm;
+use super::db;
 
 // This helper macro creates a JSON response formatted as an error.
 #[macro_export]
@@ -22,20 +22,37 @@ macro_rules! get_db_connection {
             Ok(db_connection) => db_connection,
             Err(_) => return response_error!("cannot connect to database", $response)
         }
-    };
+    }
+}
+
+// This helper macro tries to cast the passed value as an i64 
+// and returns the appropriate error if an overflow occurs.
+#[macro_export]
+macro_rules! into_i64 {
+    ($val:expr, $response:ident) => {
+        match i64::try_from($val) {
+            Ok(int) => int,
+            Err(_) => return response_error!("numeric overflow", $response)
+        }
+    }
+}
+
+// This helper macro tries to unpack a web::block thread result
+// and returns the appropriate error if the result is an error.
+#[macro_export]
+macro_rules! thread_unwrap {
+    ($thread_result:expr, $response:ident) => {
+        match $thread_result {
+            Ok(result) => result,
+            Err(_) => return response_error!("thread error", $response)
+        }
+    }
 }
 
 #[derive(Debug, Deserialize)]
 struct PairRequest {
     blockchain: String,
-    pair_address: String,
-    after: Option<u64>,
-    before: Option<u64>
-}
-
-#[derive(Debug, Deserialize)]
-struct SandwichRequest {
-    sandwich_id: u64
+    pair_address: String
 }
 
 #[derive(Debug, Serialize)]
@@ -76,7 +93,10 @@ struct TokenMetadata {
 }
 
 #[get("/pair")]
-async fn fetch_pair(data: web::Data<AppState>, info: web::Query<PairRequest>) -> web::Json<PairResponse> {
+async fn fetch_pair(
+    data: web::Data<AppState>, 
+    info: web::Query<PairRequest>
+) -> web::Json<PairResponse> {
     // Get a database connection, and return an error
     // if a connection cannot be established.
     let db_connection = get_db_connection!(data, PairResponse);
@@ -115,14 +135,8 @@ async fn fetch_pair(data: web::Data<AppState>, info: web::Query<PairRequest>) ->
         Ok((pair, base, quote))
     }).await;
 
-    // Unpack the thread result.
-    let metadata_db_result = match metadata_thread_result {
-        Ok(result) => result,
-        Err(_) => return response_error!("thread error", PairResponse)
-    };
-
     // Unpack the database result.
-    if let Ok((pair, base, quote)) = metadata_db_result {
+    if let Ok((pair, base, quote)) = thread_unwrap!(metadata_thread_result, PairResponse) {
         // The pair, base and quote were successfully fetched,
         // so process the data and return it to the user as JSON.
 
@@ -297,14 +311,8 @@ async fn fetch_pair(data: web::Data<AppState>, info: web::Query<PairRequest>) ->
             };
         }).await;
 
-        // Unpack the thread result.
-        let db_result = match insert_thread_result {
-            Ok(result) => result,
-            _ => return response_error!("thread error", PairResponse)
-        };
-
         // Unpack the database result.
-        if let Ok(_) = db_result {
+        if let Ok(_) = thread_unwrap!(insert_thread_result, PairResponse) {
             pair_response
         } else {
             response_error!("database write error", PairResponse)
@@ -312,16 +320,189 @@ async fn fetch_pair(data: web::Data<AppState>, info: web::Query<PairRequest>) ->
     }
 }
 
-#[get("/sandwich")]
-async fn fetch_sandwich(info: web::Query<SandwichRequest>) -> impl Responder {
-    // under construction
-    HttpResponse::Ok()
+#[derive(Debug, Deserialize)]
+struct SandwichesRequest {
+    blockchain: String,
+    pair_address: String,
+    before: Option<u64>
+}
+
+#[derive(Debug, Serialize)]
+struct SandwichesResponse {
+    sandwiches: Option<Vec<SandwichData>>,
+    metadata: Option<ScannerMetadata>,
+    error_message: String
+}
+
+impl SandwichesResponse {
+    fn as_error(msg: String) -> Self {
+        Self {
+            sandwiches: None,
+            metadata: None,
+            error_message: msg
+        }
+    }
+}
+
+#[derive(Debug, Serialize)]
+struct SandwichData {
+    block_number: u64,
+    frontrun: TransactionData,
+    lunchmeat: Vec<TransactionData>,
+    backrun: TransactionData
+}
+
+#[derive(Debug, Serialize)]
+struct TransactionData {
+    hash: String,
+    index: usize,
+    base_in: f64,
+    quote_in: f64,
+    base_out: f64,
+    quote_out: f64,
+    gas: f64
+}
+
+#[derive(Debug, Serialize)]
+struct ScannerMetadata {
+    latest_fetched_block: u64,
+    earliest_fetched_block: u64,
+    latest_scanned_block: u64,
+    earliest_scanned_block: u64,
+    scanning_latest: bool,
+    scanning_previous: bool
 }
 
 #[get("/sandwiches")]
-async fn fetch_sandwiches(info: web::Query<PairRequest>) -> impl Responder {
+async fn fetch_sandwiches(
+    data: web::Data<AppState>, 
+    info: web::Query<SandwichesRequest>
+) -> web::Json<SandwichesResponse> {
+    // Standardize the incoming data.
+    let blockchain_id = info.blockchain.to_lowercase();
+    let pair_address = info.pair_address.to_lowercase();
+
+    // First get the blockchain state data, or return an error.
+    let blockchain = match data.blockchains.get(&blockchain_id) {
+        Some(blockchain) => blockchain,
+        None => return response_error!("blockchain not supported", SandwichesResponse)
+    };
+
+    // Determine from which block to begin the reverse-chronological scan.
+    let before = match info.before {
+        Some(block_number) => block_number,
+        None => {
+            match evm::fetch_latest_block_number(&blockchain.provider_url).await {
+                Ok(block_number) => block_number,
+                _ => return response_error!("provider error", SandwichesResponse)
+            }
+        }
+    };
+
+    // Get a database connection, and return an error
+    // if a connection cannot be established.
+    let db_connection = get_db_connection!(data, SandwichesResponse);
+
+    // Spawn a new, non-blocking thread to fetch
+    // the pair from the database, if it exists.
+    let pair_thread_result = web::block(move || {
+        db::fetch_pair_by_params(
+            &db_connection,
+            &blockchain_id,
+            &pair_address)
+    }).await;
+
+    // Unpack the database result.
+    let pair = match thread_unwrap!(pair_thread_result, SandwichesResponse) {
+        Ok(pair) => pair,
+        Err(NotFound) => return response_error!("pair does not exist", SandwichesResponse),
+        Err(_) => return response_error!("database error", SandwichesResponse)
+    };
+
+    // Set up helper variables.
+    let max_blocks = blockchain.scanner_params.max_blocks_per_request;
+    let pair_id = pair.pair_id;
+
+    // Determine at which block the search must end.
+    let after = if before > max_blocks {
+        before - max_blocks
+    } else {
+        0
+    };             
+
+    // Check if the search range for this scan begins
+    // within the block range that's already been scanned.
+    if let Some(latest) = pair.latest_scanned_block {
+        if let Some(earliest) = pair.earliest_scanned_block {
+            let earliest = earliest as u64;
+            let latest = latest as u64;
+
+            //          `earliest`                       `latest`
+            //          |  `after`                       |     
+            //          |  |                  |          |           
+            // ---------+--+==================+----------+--------->
+            //          |  |                  |          |           
+            //              \----------------/|                      
+            //                 `max_blocks`    `before`  
+
+            if earliest < before && before <= latest {
+                // We have scanned this region of blocks already.
+                // So return up to `max_blocks` worth of sandwiches.
+                let min_ge_block = if after > earliest { 
+                    into_i64!(after, SandwichesResponse)
+                } else { 
+                    into_i64!(earliest, SandwichesResponse)
+                };
+
+                let max_le_block = into_i64!(before, SandwichesResponse);
+
+                // Get a database connection, and return an error
+                // if a connection cannot be established.
+                let db_connection = get_db_connection!(data, SandwichesResponse);
+
+                // Spawn a new, non-blocking thread to fetch
+                // the sandwiches from the database, if they exist.
+                let sandwiches_thread_result = web::block(move || {
+                    // Get the sandwiches in the database's Sandwich model form.
+                    let db_sandwiches = match db::fetch_all_sandwiches_by_params(
+                        &db_connection,
+                        pair_id,
+                        Some(min_ge_block),
+                        Some(max_le_block)) {
+
+                        Ok(sandwich_vector) => sandwich_vector,
+                        Err(e) => return Err(e)
+                    };
+
+                    // Create a vector of sandwiches in SandwichData form.
+                    let sandwiches: Vec<SandwichData> = Vec::new();
+
+                    for db_sandwich in &db_sandwiches {
+                        // Get the frontrun transaction for this sandwich.
+                        
+                    }
+
+                    // under construction
+                    Ok(())
+                }).await;
+
+                // Unpack the database result. 
+                let sandwiches = match thread_unwrap!(sandwiches_thread_result, SandwichesResponse) {
+                    Ok(sandwich_vector) => sandwich_vector,
+                    Err(_) => return response_error!("sandwiches read error", SandwichesResponse)
+                };
+
+                
+            }
+        }
+    } 
+
+    // No scanning has taken place on this pair before,
+    // so begin the scan at the `before` block.
+
+
     // under construction
-    HttpResponse::Ok()
+    response_error!("under construction", SandwichesResponse)
 }
 
 // Package up all the api routes into a ServiceConfig
@@ -330,6 +511,5 @@ pub fn routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/api")
         .service(fetch_pair)
-        .service(fetch_sandwich)
         .service(fetch_sandwiches));
 }

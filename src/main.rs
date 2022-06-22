@@ -5,7 +5,6 @@ use actix_files::Files;
 use dotenv::dotenv;
 pub use state::{ AppState, init_app_state };
 
-mod evm;
 mod api;
 mod app;
 mod state;

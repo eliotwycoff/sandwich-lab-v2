@@ -1,8 +1,8 @@
-use ethers::prelude::{ Provider, Http, Middleware, Contract, Multicall, LogMeta };
-use ethers::abi::{ Abi, AbiParser, Detokenize };
-use ethers::types::{ Address };
-use ethers::utils::{ hex };
-use std::sync::{ Arc };
+use ethers::prelude::{ Provider, Http, Middleware, Contract };
+use ethers::abi::AbiParser;
+use ethers::types::Address;
+use ethers::utils::hex;
+use std::sync::Arc;
 use std::convert::From;
 
 type RpcError = Box<dyn std::error::Error + Send + Sync>;
@@ -35,6 +35,14 @@ impl From<Metadata> for PairMetadata {
             quote_decimals: metadata.8
         }
     }
+}
+
+// Fetches the latest block number from the given provider.
+pub async fn fetch_latest_block_number(
+    provider_url: &str
+) -> Result<u64, RpcError> {
+    let provider = Provider::<Http>::try_from(provider_url)?;
+    Ok(provider.get_block_number().await?.as_u64())
 }
 
 // Fetches the pair (and base and quote token) metadata

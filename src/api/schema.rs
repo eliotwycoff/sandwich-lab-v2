@@ -3,6 +3,11 @@ table! {
         backrun_id -> Int8,
         tx_hash -> Bpchar,
         tx_index -> Int4,
+        base_in -> Float8,
+        quote_in -> Float8,
+        base_out -> Float8,
+        quote_out -> Float8,
+        gas -> Float8,
         sandwich_id -> Int8,
     }
 }
@@ -12,6 +17,11 @@ table! {
         frontrun_id -> Int8,
         tx_hash -> Bpchar,
         tx_index -> Int4,
+        base_in -> Float8,
+        quote_in -> Float8,
+        base_out -> Float8,
+        quote_out -> Float8,
+        gas -> Float8,
         sandwich_id -> Int8,
     }
 }
@@ -21,6 +31,11 @@ table! {
         lunchmeat_id -> Int8,
         tx_hash -> Bpchar,
         tx_index -> Int4,
+        base_in -> Float8,
+        quote_in -> Float8,
+        base_out -> Float8,
+        quote_out -> Float8,
+        gas -> Float8,
         sandwich_id -> Int8,
     }
 }

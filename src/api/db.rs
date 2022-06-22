@@ -23,7 +23,7 @@ pub fn init_db_pool() -> Pool {
 }
 
 // Fetch the token with the given parameters,
-// or return Ok(None).
+// or return Err(NotFound).
 pub fn fetch_token_by_params(
     db_connection: &DbConnection,
     blockchain_id: &str,
@@ -38,7 +38,7 @@ pub fn fetch_token_by_params(
 }
 
 // Fetch the token with the given token_id,
-// or return Ok(None)
+// or return Err(NotFound).
 pub fn fetch_token_by_id(
     db_connection: &DbConnection,
     tid: i32
@@ -77,7 +77,7 @@ pub fn insert_token(
 }
 
 // Fetch the pair with the given parameters,
-// or return Ok(None).
+// or return Err(NotFound).
 pub fn fetch_pair_by_params(
     db_connection: &DbConnection, 
     blockchain_id: &str, 
@@ -92,7 +92,7 @@ pub fn fetch_pair_by_params(
 }
 
 // Fetch the pair with the given pair_id,
-// or return Ok(None).
+// or return Err(NotFound).
 pub fn fetch_pair_by_id(
     db_connection: &DbConnection,
     pid: i32
@@ -131,7 +131,7 @@ pub fn insert_pair(
 }
 
 // Fetch all sandwiches for a given pair_id and block_number range
-// or return Ok(None)
+// or return Err(NotFound).
 pub fn fetch_all_sandwiches_by_params(
     db_connection: &DbConnection,
     pid: i32,
@@ -141,34 +141,31 @@ pub fn fetch_all_sandwiches_by_params(
     use crate::api::schema::sandwiches::dsl::*;
 
     let base_query = sandwiches.filter(pair_id.eq(pid));
-    let some_sandwiches;
 
     if let Some(min_block) = min_ge_block {
         if let Some(max_block) = max_le_block {
-            some_sandwiches = base_query
+            base_query
                 .filter(block_number.between(min_block, max_block))
-                .load::<Sandwich>(db_connection)?;
+                .load::<Sandwich>(db_connection)
         } else {
-            some_sandwiches = base_query
+            base_query
                 .filter(block_number.ge(min_block))
-                .load::<Sandwich>(db_connection)?;
+                .load::<Sandwich>(db_connection)
         }
     } else {
         if let Some(max_block) = max_le_block {
-            some_sandwiches = base_query
+            base_query
                 .filter(block_number.le(max_block))
-                .load::<Sandwich>(db_connection)?;
+                .load::<Sandwich>(db_connection)
         } else {
-            some_sandwiches = base_query
-                .load::<Sandwich>(db_connection)?;
+            base_query
+                .load::<Sandwich>(db_connection)
         }
     }
-
-    Ok(some_sandwiches)
 }
 
 // Fetch the sandwich with the given sandwich_id,
-// or return Ok(None).
+// or return Err(NotFound).
 pub fn fetch_sandwich_by_id(
     db_connection: &DbConnection,
     sid: i64
@@ -176,6 +173,45 @@ pub fn fetch_sandwich_by_id(
     use crate::api::schema::sandwiches::dsl::*;
 
     sandwiches
+        .find(sid)
+        .first(db_connection)
+}
+
+// Fetch the frontrun transaction for a given sandwich_id
+// or return Err(NotFound).
+pub fn fetch_frontrun_transaction_by_sandwich_id(
+    db_connection: &DbConnection,
+    sid: i64
+) -> Result<FrontrunTransaction, DbError> {
+    use crate::api::schema::frontrun_transactions::dsl::*;
+
+    frontrun_transactions
+        .find(sid)
+        .first(db_connection)
+}
+
+// Fetch all lunchmeat transations for a given sandwich_id
+// or return Err(NotFound).
+pub fn fetch_lunchmeat_transactions_by_sandwich_id(
+    db_connection: &DbConnection,
+    sid: i64
+) -> Result<Vec<LunchmeatTransaction>, DbError> {
+    use crate::api::schema::lunchmeat_transactions::dsl::*;
+
+    lunchmeat_transactions
+        .filter(sandwich_id.eq(sid))
+        .load::<LunchmeatTransaction>(db_connection)
+}
+
+// Fetch the backrun transaction for a given sandwich_id
+// or return Err(NotFound).
+pub fn fetch_backrun_transaction_by_sandwich_id(
+    db_connection: &DbConnection,
+    sid: i64
+) -> Result<BackrunTransaction, DbError> {
+    use crate::api::schema::backrun_transactions::dsl::*;
+
+    backrun_transactions
         .find(sid)
         .first(db_connection)
 }

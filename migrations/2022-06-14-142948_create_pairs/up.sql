@@ -36,6 +36,11 @@ CREATE TABLE frontrun_transactions (
     frontrun_id BIGSERIAL PRIMARY KEY,
     tx_hash CHAR (66) NOT NULL,
     tx_index INT NOT NULL,
+    base_in DOUBLE PRECISION NOT NULL,
+    quote_in DOUBLE PRECISION NOT NULL,
+    base_out DOUBLE PRECISION NOT NULL,
+    quote_out DOUBLE PRECISION NOT NULL,
+    gas DOUBLE PRECISION NOT NULL,
     sandwich_id BIGINT NOT NULL REFERENCES sandwiches (sandwich_id) ON DELETE CASCADE,
     UNIQUE (sandwich_id)
 );
@@ -44,6 +49,11 @@ CREATE TABLE lunchmeat_transactions (
     lunchmeat_id BIGSERIAL PRIMARY KEY,
     tx_hash CHAR (66) NOT NULL,
     tx_index INT NOT NULL,
+    base_in DOUBLE PRECISION NOT NULL,
+    quote_in DOUBLE PRECISION NOT NULL,
+    base_out DOUBLE PRECISION NOT NULL,
+    quote_out DOUBLE PRECISION NOT NULL,
+    gas DOUBLE PRECISION NOT NULL,
     sandwich_id BIGINT NOT NULL REFERENCES sandwiches (sandwich_id) ON DELETE CASCADE
 );
 
@@ -53,6 +63,11 @@ CREATE TABLE backrun_transactions (
     backrun_id BIGSERIAL PRIMARY KEY,
     tx_hash CHAR (66) NOT NULL,
     tx_index INT NOT NULL,
+    base_in DOUBLE PRECISION NOT NULL,
+    quote_in DOUBLE PRECISION NOT NULL,
+    base_out DOUBLE PRECISION NOT NULL,
+    quote_out DOUBLE PRECISION NOT NULL,
+    gas DOUBLE PRECISION NOT NULL,
     sandwich_id BIGINT NOT NULL REFERENCES sandwiches (sandwich_id) ON DELETE CASCADE,
     UNIQUE (sandwich_id)
 );

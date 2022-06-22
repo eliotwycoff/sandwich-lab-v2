@@ -39,9 +39,9 @@ pub struct Pair {
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable)]
 #[table_name = "sandwiches"]
 pub struct Sandwich {
-    sandwich_id: i64,
+    pub sandwich_id: i64,
     pair_id: i32,
-    block_number: i64
+    pub block_number: i64
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable)]
@@ -50,6 +50,11 @@ pub struct FrontrunTransaction {
     frontrun_id: i64,
     tx_hash: String,
     tx_index: i32,
+    base_in: f64,
+    quote_in: f64,
+    base_out: f64,
+    quote_out: f64,
+    gas: f64,
     sandwich_id: i64
 }
 
@@ -59,6 +64,11 @@ pub struct LunchmeatTransaction {
     lunchmeat_id: i64,
     tx_hash: String,
     tx_index: i32,
+    base_in: f64,
+    quote_in: f64,
+    base_out: f64,
+    quote_out: f64,
+    gas: f64,
     sandwich_id: i64
 }
 
@@ -68,5 +78,10 @@ pub struct BackrunTransaction {
     backrun_id: i64,
     tx_hash: String,
     tx_index: i32,
+    base_in: f64,
+    quote_in: f64,
+    base_out: f64,
+    quote_out: f64,
+    gas: f64,
     sandwich_id: i64
 }

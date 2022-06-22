@@ -1,0 +1,77 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/Users/eliotwycoff/Workspace/Development/Web3Coursework/Bootcamp/Final/Sandwich-Lab-V2/sandwich-lab-v2/data_aggregator/contracts/DataAggregator.sol": {
+      "lastModificationDate": 1655721259315,
+      "contentHash": "209e6ca65ebfd6d6b73d940e2edb1cd9",
+      "sourceName": "contracts/DataAggregator.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./DataUtils.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "DataAggregator"
+      ]
+    },
+    "/Users/eliotwycoff/Workspace/Development/Web3Coursework/Bootcamp/Final/Sandwich-Lab-V2/sandwich-lab-v2/data_aggregator/contracts/DataUtils.sol": {
+      "lastModificationDate": 1655721259346,
+      "contentHash": "0390061057d1da769f0626522ba2acab",
+      "sourceName": "contracts/DataUtils.sol",
+      "solcConfig": {
+        "version": "0.8.4",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.4"
+      ],
+      "artifacts": [
+        "DataUtils"
+      ]
+    }
+  }
+}
