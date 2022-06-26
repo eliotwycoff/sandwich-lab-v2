@@ -14,7 +14,7 @@ pub fn render(title: &str, message: &str, home_url: &str) -> String {
     "##;
 
     let inner_content = r##"
-        <h1 class="page-header">404 Not Found</h1>
+        <h1 class="page-title">404 Not Found</h1>
         <p>{{message}} <a href="{{home_url}}">Return Home</a></p>
 
     "##;

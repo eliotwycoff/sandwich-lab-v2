@@ -1,10 +1,9 @@
-//#[macro_use]
 use diesel::*;
-//use diesel::sql_types::*;
 use serde::{ Serialize, Deserialize };
 use crate::api::schema::{ 
     tokens, 
     pairs, 
+    ranges,
     sandwiches, 
     frontrun_transactions, 
     lunchmeat_transactions, 
@@ -29,11 +28,18 @@ pub struct Pair {
     pub factory_address: String,
     pub pair_address: String,
     pub base_token_id: i32,
-    pub quote_token_id: i32,
-    pub latest_scanned_block: Option<i64>,
-    pub earliest_scanned_block: Option<i64>,
-    pub scanning_latest: bool,
-    pub scanning_previous: bool
+    pub quote_token_id: i32
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable)]
+#[table_name = "ranges"]
+pub struct Range {
+    pub range_id: i64,
+    pub pair_id: i32,
+    pub lower_bound: i64,
+    pub upper_bound: i64,
+    pub scan_complete: bool,
+    pub scan_failed: bool
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Queryable, Insertable)]
@@ -48,13 +54,13 @@ pub struct Sandwich {
 #[table_name = "frontrun_transactions"]
 pub struct FrontrunTransaction {
     frontrun_id: i64,
-    tx_hash: String,
-    tx_index: i32,
-    base_in: f64,
-    quote_in: f64,
-    base_out: f64,
-    quote_out: f64,
-    gas: f64,
+    pub tx_hash: String,
+    pub tx_index: i32,
+    pub base_in: f64,
+    pub quote_in: f64,
+    pub base_out: f64,
+    pub quote_out: f64,
+    pub gas: f64,
     sandwich_id: i64
 }
 
@@ -62,13 +68,13 @@ pub struct FrontrunTransaction {
 #[table_name = "lunchmeat_transactions"]
 pub struct LunchmeatTransaction {
     lunchmeat_id: i64,
-    tx_hash: String,
-    tx_index: i32,
-    base_in: f64,
-    quote_in: f64,
-    base_out: f64,
-    quote_out: f64,
-    gas: f64,
+    pub tx_hash: String,
+    pub tx_index: i32,
+    pub base_in: f64,
+    pub quote_in: f64,
+    pub base_out: f64,
+    pub quote_out: f64,
+    pub gas: f64,
     sandwich_id: i64
 }
 
@@ -76,12 +82,12 @@ pub struct LunchmeatTransaction {
 #[table_name = "backrun_transactions"]
 pub struct BackrunTransaction {
     backrun_id: i64,
-    tx_hash: String,
-    tx_index: i32,
-    base_in: f64,
-    quote_in: f64,
-    base_out: f64,
-    quote_out: f64,
-    gas: f64,
+    pub tx_hash: String,
+    pub tx_index: i32,
+    pub base_in: f64,
+    pub quote_in: f64,
+    pub base_out: f64,
+    pub quote_out: f64,
+    pub gas: f64,
     sandwich_id: i64
 }

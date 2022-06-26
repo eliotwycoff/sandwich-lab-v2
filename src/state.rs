@@ -32,6 +32,7 @@ pub struct NativeToken {
 
 // Each exchange that this application interacts with
 // will have helper data stored in an Exchange instance.
+#[derive(Debug, Clone)]
 pub enum Exchange {
     V2 { name: String },
     V3 { name: String }
@@ -61,6 +62,35 @@ pub fn init_app_state() -> Data<AppState> {
 fn init_blockchains() -> HashMap<String, Blockchain> {
     HashMap::from([ 
         (
+            "arbitrum".to_string(),
+            Blockchain {
+                name: "Arbitrum".to_string(),
+                provider_url: env::var("ARBITRUM_URL")
+                    .expect("error reading provider url"),
+                data_aggregator_address: env::var("ARBITRUM_DATA_AGGREGATOR")
+                    .expect("error reading data aggregator address"),
+                exchanges: HashMap::from([
+                    (
+                        "0x1F98431c8aD98523631AE4a59f267346ea31F984".to_lowercase(),
+                        Exchange::V3 {
+                            name: "Uniswap V3".to_string()
+                        }
+                    )
+                ]),
+                scanner_params: Params {
+                    blocks_per_chunk: 1_000,
+                    max_blocks_per_chunk: 10_000,
+                    target_swaps_per_chunk: 300,
+                    max_blocks_per_request: 100_000
+                },
+                native_token: NativeToken {
+                    name: "Ethereum".to_string(),
+                    symbol: "ETH".to_string(),
+                    decimals: 18
+                }
+            }
+        ),
+        (
             "avalanche".to_string(),
             Blockchain {
                 name: "Avalanche".to_string(),
@@ -89,6 +119,7 @@ fn init_blockchains() -> HashMap<String, Blockchain> {
                     )
                 ]),
                 scanner_params: Params {
+                    blocks_per_chunk: 1_000,
                     max_blocks_per_chunk: 10_000,
                     target_swaps_per_chunk: 300,
                     max_blocks_per_request: 100_000
@@ -129,6 +160,7 @@ fn init_blockchains() -> HashMap<String, Blockchain> {
                     )
                 ]),
                 scanner_params: Params {
+                    blocks_per_chunk: 1_000,
                     max_blocks_per_chunk: 10_000,
                     target_swaps_per_chunk: 300,
                     max_blocks_per_request: 100_000
@@ -157,7 +189,8 @@ fn init_blockchains() -> HashMap<String, Blockchain> {
                     )
                 ]),
                 scanner_params: Params {
-                    max_blocks_per_chunk: 10000,
+                    blocks_per_chunk: 1_000,
+                    max_blocks_per_chunk: 10_000,
                     target_swaps_per_chunk: 300,
                     max_blocks_per_request: 100_000
                 },
@@ -203,6 +236,7 @@ fn init_blockchains() -> HashMap<String, Blockchain> {
                     )
                 ]),
                 scanner_params: Params {
+                    blocks_per_chunk: 100,
                     max_blocks_per_chunk: 1_000,
                     target_swaps_per_chunk: 100,
                     max_blocks_per_request: 10_000
@@ -243,6 +277,7 @@ fn init_blockchains() -> HashMap<String, Blockchain> {
                     )
                 ]),
                 scanner_params: Params {
+                    blocks_per_chunk: 100,
                     max_blocks_per_chunk: 1_000,
                     target_swaps_per_chunk: 100,
                     max_blocks_per_request: 10_000
@@ -250,6 +285,35 @@ fn init_blockchains() -> HashMap<String, Blockchain> {
                 native_token: NativeToken {
                     name: "Moonriver".to_string(),
                     symbol: "MOVR".to_string(),
+                    decimals: 18
+                }
+            }
+        ),
+        (
+            "optimism".to_string(),
+            Blockchain {
+                name: "Optimism".to_string(),
+                provider_url: env::var("OPTIMISM_URL")
+                    .expect("error reading provider url"),
+                data_aggregator_address: env::var("OPTIMISM_DATA_AGGREGATOR")
+                    .expect("error readign data aggregator address"),
+                exchanges: HashMap::from([
+                    (
+                        "0x1F98431c8aD98523631AE4a59f267346ea31F984".to_lowercase(),
+                        Exchange::V3 {
+                            name: "Uniswap V3".to_string()
+                        }
+                    )
+                ]),
+                scanner_params: Params {
+                    blocks_per_chunk: 1_000,
+                    max_blocks_per_chunk: 10_000,
+                    target_swaps_per_chunk: 300,
+                    max_blocks_per_request: 100_000
+                },
+                native_token: NativeToken {
+                    name: "Ethereum".to_string(),
+                    symbol: "ETH".to_string(),
                     decimals: 18
                 }
             }
@@ -283,6 +347,7 @@ fn init_blockchains() -> HashMap<String, Blockchain> {
                     )
                 ]),
                 scanner_params: Params {
+                    blocks_per_chunk: 1_000,
                     max_blocks_per_chunk: 10_000,
                     target_swaps_per_chunk: 300,
                     max_blocks_per_request: 100_000

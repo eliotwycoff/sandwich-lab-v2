@@ -48,10 +48,17 @@ table! {
         pair_address -> Bpchar,
         base_token_id -> Int4,
         quote_token_id -> Int4,
-        latest_scanned_block -> Nullable<Int8>,
-        earliest_scanned_block -> Nullable<Int8>,
-        scanning_latest -> Bool,
-        scanning_previous -> Bool,
+    }
+}
+
+table! {
+    ranges (range_id) {
+        range_id -> Int8,
+        pair_id -> Int4,
+        lower_bound -> Int8,
+        upper_bound -> Int8,
+        scan_complete -> Bool,
+        scan_failed -> Bool,
     }
 }
 
@@ -77,6 +84,7 @@ table! {
 joinable!(backrun_transactions -> sandwiches (sandwich_id));
 joinable!(frontrun_transactions -> sandwiches (sandwich_id));
 joinable!(lunchmeat_transactions -> sandwiches (sandwich_id));
+joinable!(ranges -> pairs (pair_id));
 joinable!(sandwiches -> pairs (pair_id));
 
 allow_tables_to_appear_in_same_query!(
@@ -84,6 +92,7 @@ allow_tables_to_appear_in_same_query!(
     frontrun_transactions,
     lunchmeat_transactions,
     pairs,
+    ranges,
     sandwiches,
     tokens,
 );

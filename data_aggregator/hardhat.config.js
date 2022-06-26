@@ -10,6 +10,10 @@ module.exports = {
     ]
   },
   networks: {
+    arbitrum: {
+      url: process.env.ARBITRUM_URL,
+      accounts: [process.env.PRIVATE_KEY]
+    },
     avalanche: {
       url: process.env.AVALANCHE_URL,
       accounts: [process.env.PRIVATE_KEY]
@@ -22,20 +26,20 @@ module.exports = {
       url: process.env.GOERLI_URL,
       accounts: [process.env.PRIVATE_KEY]
     },
-    moonriver: {
-      url: process.env.MOONRIVER_URL,
-      accounts: [process.env.PRIVATE_KEY]
-    },
     moonbeam: {
       url: process.env.MOONBEAM_URL,
       accounts: [process.env.PRIVATE_KEY]
     },
-    polygon: {
-      url: process.env.POLYGON_URL,
+    moonriver: {
+      url: process.env.MOONRIVER_URL,
       accounts: [process.env.PRIVATE_KEY]
     },
-    rinkeby: {
-      url: process.env.RINKEBY_URL,
+    optimism: {
+      url: process.env.OPTIMISM_URL,
+      accounts: [process.env.PRIVATE_KEY]
+    },
+    polygon: {
+      url: process.env.POLYGON_URL,
       accounts: [process.env.PRIVATE_KEY]
     }
   }

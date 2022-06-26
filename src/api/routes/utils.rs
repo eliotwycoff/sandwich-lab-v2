@@ -41,3 +41,24 @@ macro_rules! thread_unwrap {
         }
     }
 }
+
+// This helper macro implements the From trait for the various
+// `Transaction` db structs into `sandwiches::TransactionData`
+#[macro_export]
+macro_rules! implement_transaction_data_from {
+    ($from:ident) => {
+        impl std::convert::From<&$from> for super::sandwiches::TransactionData {
+            fn from(tx: &$from) -> Self {
+                Self {
+                    hash: tx.tx_hash.clone(),
+                    index: tx.tx_index as usize,
+                    base_in: tx.base_in,
+                    quote_in: tx.quote_in,
+                    base_out: tx.base_out,
+                    quote_out: tx.quote_out,
+                    gas: tx.gas
+                }
+            }
+        }
+    }
+}

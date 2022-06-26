@@ -2,8 +2,7 @@ use actix_web::{ get, web };
 use serde::{ Serialize, Deserialize };
 use diesel::NotFound;
 use crate::state::AppState;
-use super::super::evm;
-use super::super::db;
+use super::super::{ evm, db };
 
 #[derive(Debug, Deserialize)]
 struct PairRequest {
@@ -33,11 +32,7 @@ impl PairResponse {
 #[derive(Debug, Serialize)]
 struct PairMetadata {
     address: String,
-    exchange_name: String,
-    latest_scanned_block: Option<i64>,
-    earliest_scanned_block: Option<i64>,
-    scanning_latest: bool,
-    scanning_previous: bool
+    exchange_name: String
 }
 
 #[derive(Debug, Serialize)]
@@ -71,19 +66,22 @@ async fn fetch_pair(
     // the pair, base and quote from the database.
     let metadata_thread_result = web::block(move || {
         let pair = match db::fetch_pair_by_params(
-            &db_connection, &blockchain_id, &pair_address) {
+            &db_connection, &blockchain_id, &pair_address
+        ) {
             Ok(pair) => pair,
             Err(e) => return Err(e)
         };
 
         let base = match db::fetch_token_by_id(
-            &db_connection, pair.base_token_id) {
+            &db_connection, pair.base_token_id
+        ) {
             Ok(token) => token,
             Err(e) => return Err(e)
         };
         
         let quote = match db::fetch_token_by_id(
-            &db_connection, pair.quote_token_id) {
+            &db_connection, pair.quote_token_id
+        ) {
             Ok(token) => token,
             Err(e) => return Err(e)
         };
@@ -118,11 +116,7 @@ async fn fetch_pair(
         web::Json(PairResponse {
             pair: Some(PairMetadata {
                 address: pair.pair_address,
-                exchange_name: exchange_name,
-                latest_scanned_block: pair.latest_scanned_block,
-                earliest_scanned_block: pair.earliest_scanned_block,
-                scanning_latest: pair.scanning_latest,
-                scanning_previous: pair.scanning_previous
+                exchange_name: exchange_name
             }),
             base: Some(TokenMetadata {
                 address: base.token_address,
@@ -147,8 +141,8 @@ async fn fetch_pair(
         let metadata = match evm::fetch_pair_metadata(
             &blockchain.provider_url,
             &pair_address,
-            &blockchain.data_aggregator_address).await {
-            
+            &blockchain.data_aggregator_address
+        ).await {
             Ok(metadata) => metadata,
             _ => return response_error!("provider error", PairResponse)
         };
@@ -171,11 +165,7 @@ async fn fetch_pair(
         let pair_response = web::Json(PairResponse {
             pair: Some(PairMetadata {
                 address: pair_address.clone(),
-                exchange_name: exchange_name,
-                latest_scanned_block: None,
-                earliest_scanned_block: None,
-                scanning_latest: false,
-                scanning_previous: false
+                exchange_name: exchange_name
             }),
             base: Some(TokenMetadata {
                 address: base_address.clone(),
@@ -211,8 +201,8 @@ async fn fetch_pair(
             let base_id = match db::fetch_token_by_params(
                 &db_connection,
                 &blockchain_id,
-                &base_address) {
-
+                &base_address
+            ) {
                 Ok(base_token) => base_token.token_id,
                 Err(NotFound) => {
                     match db::insert_token(
@@ -234,8 +224,8 @@ async fn fetch_pair(
             let quote_id = match db::fetch_token_by_params(
                 &db_connection,
                 &blockchain_id,
-                &quote_address) {
-                
+                &quote_address
+            ) {
                 Ok(quote_token) => quote_token.token_id,
                 Err(NotFound) => {
                     match db::insert_token(

@@ -1,11 +1,14 @@
 use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
 use diesel::result::Error as DbError;
+use diesel::dsl::max;
+use diesel::{ insert_into, update/*, delete*/ };
 use std::env;
 use r2d2;
 use super::models::{ 
     Token, 
     Pair, 
+    Range,
     Sandwich, 
     FrontrunTransaction, 
     LunchmeatTransaction, 
@@ -23,7 +26,7 @@ pub fn init_db_pool() -> Pool {
 }
 
 // Fetch the token with the given parameters,
-// or return Err(NotFound).
+// or return `Err(NotFound)`.
 pub fn fetch_token_by_params(
     db_connection: &DbConnection,
     blockchain_id: &str,
@@ -38,7 +41,7 @@ pub fn fetch_token_by_params(
 }
 
 // Fetch the token with the given token_id,
-// or return Err(NotFound).
+// or return `Err(NotFound)`.
 pub fn fetch_token_by_id(
     db_connection: &DbConnection,
     tid: i32
@@ -51,7 +54,7 @@ pub fn fetch_token_by_id(
 }
 
 // Take the parameters for a new token;
-// then insert it and return the new token_id.
+// then insert it and return the new `token_id`.
 pub fn insert_token(
     db_connection: &DbConnection,
     token_nm: &str,
@@ -70,14 +73,14 @@ pub fn insert_token(
         token_address.eq(token_addr.to_lowercase())
     );
 
-    Ok(diesel::insert_into(tokens)
+    insert_into(tokens)
         .values(values)
         .returning(token_id)
-        .get_result(db_connection)?)
+        .get_result(db_connection)
 }
 
 // Fetch the pair with the given parameters,
-// or return Err(NotFound).
+// or return `Err(NotFound)`.
 pub fn fetch_pair_by_params(
     db_connection: &DbConnection, 
     blockchain_id: &str, 
@@ -91,9 +94,9 @@ pub fn fetch_pair_by_params(
         .first(db_connection) // returns Ok(record) if found else Err(NotFound)
 }
 
-// Fetch the pair with the given pair_id,
-// or return Err(NotFound).
-pub fn fetch_pair_by_id(
+// Fetch the pair with the given `pair_id`,
+// or return `Err(NotFound)`.
+/*pub fn fetch_pair_by_id(
     db_connection: &DbConnection,
     pid: i32
 ) -> Result<Pair, DbError> {
@@ -102,10 +105,10 @@ pub fn fetch_pair_by_id(
     pairs
         .find(pid)
         .first(db_connection)
-}
+}*/
 
 // Take the parameters for a new pair;
-// then insert it and return the new pair_id.
+// then insert it and return the new `pair_id`.
 pub fn insert_pair(
     db_connection: &DbConnection,
     blockchain_id: &str,
@@ -124,14 +127,95 @@ pub fn insert_pair(
         quote_token_id.eq(quote_id)
     );
 
-    Ok(diesel::insert_into(pairs)
+    insert_into(pairs)
         .values(values)
         .returning(pair_id)
-        .get_result(db_connection)?)
+        .get_result(db_connection)
 }
 
-// Fetch all sandwiches for a given pair_id and block_number range
-// or return Err(NotFound).
+// Given a `block_number` and a `pair_id`, find the range,
+// if any, that contains that block.
+pub fn find_encompassing_range(
+    db_connection: &DbConnection,
+    pid: i32,
+    block_number: i64
+) -> Result<Range, DbError> {
+    use crate::api::schema::ranges::dsl::*;
+
+    ranges
+        .filter(pair_id.eq(pid))
+        .filter(lower_bound.le(block_number))
+        .filter(upper_bound.ge(block_number))
+        .first(db_connection)
+}
+
+// Given a `block_number` and a `pair_id`, find the upper bound
+// of the range, if any, that immediately precedes that block.
+pub fn find_preceding_range_upper_bound(
+    db_connection: &DbConnection,
+    pid: i32,
+    block_number: i64
+) -> Result<Option<i64>, DbError> {
+    use crate::api::schema::ranges::dsl::*;
+
+    ranges
+        .select(max(upper_bound))
+        .filter(pair_id.eq(pid))
+        .filter(upper_bound.lt(block_number))
+        .first(db_connection)
+}
+
+// Insert a new range.
+pub fn insert_range(
+    db_connection: &DbConnection,
+    pid: i32,
+    lb: i64,
+    ub: i64,
+    complete: bool,
+    failed: bool
+) -> Result<Range, DbError> {
+    use crate::api::schema::ranges::dsl::*;
+
+    let values = (
+        pair_id.eq(pid),
+        lower_bound.eq(lb),
+        upper_bound.eq(ub),
+        scan_complete.eq(complete),
+        scan_failed.eq(failed)
+    );
+
+    insert_into(ranges)
+        .values(values)
+        .get_result(db_connection)
+}
+
+// Update a range's scan-related metadata.
+pub fn update_range_metadata(
+    db_connection: &DbConnection,
+    rid: i64,
+    complete: bool,
+    failed: bool
+) -> Result<i64, DbError> {
+    use crate::api::schema::ranges::dsl::*;
+
+    update(ranges.filter(range_id.eq(rid)))
+        .set((scan_complete.eq(complete), scan_failed.eq(failed)))
+        .returning(range_id)
+        .get_result(db_connection)
+}
+
+// Delete the range given by `rid`.
+/*pub fn delete_range(
+    db_connection: &DbConnection,
+    rid: i64
+) -> Result<usize, DbError> {
+    use crate::api::schema::ranges::dsl::*;
+
+    delete(ranges.filter(range_id.eq(rid))).execute(db_connection)
+}*/
+
+// Fetch all sandwiches for a given `pair_id` and `block_number` range
+// or return `Err(NotFound)`.
 pub fn fetch_all_sandwiches_by_params(
     db_connection: &DbConnection,
     pid: i32,
@@ -164,9 +248,9 @@ pub fn fetch_all_sandwiches_by_params(
     }
 }
 
-// Fetch the sandwich with the given sandwich_id,
-// or return Err(NotFound).
-pub fn fetch_sandwich_by_id(
+// Fetch the sandwich with the given `sandwich_id`,
+// or return `Err(NotFound)`.
+/*pub fn fetch_sandwich_by_id(
     db_connection: &DbConnection,
     sid: i64
 ) -> Result<Sandwich, DbError> {
@@ -175,10 +259,28 @@ pub fn fetch_sandwich_by_id(
     sandwiches
         .find(sid)
         .first(db_connection)
+}*/
+
+// Insert a new sandwich. 
+pub fn insert_sandwich(
+    db_connection: &DbConnection,
+    pid: i32,
+    block: i64
+) -> Result<Sandwich, DbError> {
+    use crate::api::schema::sandwiches::dsl::*;
+
+    let values = (
+        pair_id.eq(pid),
+        block_number.eq(block)
+    );
+
+    insert_into(sandwiches)
+        .values(values)
+        .get_result(db_connection)
 }
 
-// Fetch the frontrun transaction for a given sandwich_id
-// or return Err(NotFound).
+// Fetch the frontrun transaction for a given `sandwich_id`
+// or return `Err(NotFound)`.
 pub fn fetch_frontrun_transaction_by_sandwich_id(
     db_connection: &DbConnection,
     sid: i64
@@ -190,8 +292,38 @@ pub fn fetch_frontrun_transaction_by_sandwich_id(
         .first(db_connection)
 }
 
-// Fetch all lunchmeat transations for a given sandwich_id
-// or return Err(NotFound).
+// Insert a new frontrun transaction.
+pub fn insert_frontrun_transaction(
+    db_connection: &DbConnection,
+    hash: &str,
+    idx: i32,
+    t0_in: f64,
+    t1_in: f64,
+    t0_out: f64,
+    t1_out: f64,
+    gs: f64,
+    sid: i64
+) -> Result<FrontrunTransaction, DbError> {
+    use crate::api::schema::frontrun_transactions::dsl::*;
+
+    let values = (
+        tx_hash.eq(hash),
+        tx_index.eq(idx),
+        base_in.eq(t0_in),
+        quote_in.eq(t1_in),
+        base_out.eq(t0_out),
+        quote_out.eq(t1_out),
+        gas.eq(gs),
+        sandwich_id.eq(sid)
+    );
+
+    insert_into(frontrun_transactions)
+        .values(values)
+        .get_result(db_connection)
+}
+
+// Fetch all lunchmeat transations for a given `sandwich_id`
+// or return `Err(NotFound)`.
 pub fn fetch_lunchmeat_transactions_by_sandwich_id(
     db_connection: &DbConnection,
     sid: i64
@@ -203,8 +335,38 @@ pub fn fetch_lunchmeat_transactions_by_sandwich_id(
         .load::<LunchmeatTransaction>(db_connection)
 }
 
-// Fetch the backrun transaction for a given sandwich_id
-// or return Err(NotFound).
+// Insert a new lunchmeat transaction.
+pub fn insert_lunchmeat_transaction(
+    db_connection: &DbConnection,
+    hash: &str,
+    idx: i32,
+    t0_in: f64,
+    t1_in: f64,
+    t0_out: f64,
+    t1_out: f64,
+    gs: f64,
+    sid: i64
+) -> Result<LunchmeatTransaction, DbError> {
+    use crate::api::schema::lunchmeat_transactions::dsl::*;
+
+    let values = (
+        tx_hash.eq(hash),
+        tx_index.eq(idx),
+        base_in.eq(t0_in),
+        quote_in.eq(t1_in),
+        base_out.eq(t0_out),
+        quote_out.eq(t1_out),
+        gas.eq(gs),
+        sandwich_id.eq(sid)
+    );
+
+    insert_into(lunchmeat_transactions)
+        .values(values)
+        .get_result(db_connection)
+}
+
+// Fetch the backrun transaction for a given `sandwich_id`
+// or return `Err(NotFound)`.
 pub fn fetch_backrun_transaction_by_sandwich_id(
     db_connection: &DbConnection,
     sid: i64
@@ -214,4 +376,34 @@ pub fn fetch_backrun_transaction_by_sandwich_id(
     backrun_transactions
         .find(sid)
         .first(db_connection)
+}
+
+// Insert a new backrun transaction.
+pub fn insert_backrun_transaction(
+    db_connection: &DbConnection,
+    hash: &str,
+    idx: i32,
+    t0_in: f64,
+    t1_in: f64,
+    t0_out: f64,
+    t1_out: f64,
+    gs: f64,
+    sid: i64
+) -> Result<BackrunTransaction, DbError> {
+    use crate::api::schema::backrun_transactions::dsl::*;
+
+    let values = (
+        tx_hash.eq(hash),
+        tx_index.eq(idx),
+        base_in.eq(t0_in),
+        quote_in.eq(t1_in),
+        base_out.eq(t0_out),
+        quote_out.eq(t1_out),
+        gas.eq(gs),
+        sandwich_id.eq(sid)
+    );
+
+    insert_into(backrun_transactions)
+        .values(values)
+        .get_result(db_connection)
 }

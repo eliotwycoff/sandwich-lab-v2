@@ -1,7 +1,7 @@
 const hre = require("hardhat");
 
 // This example script should be run via the following command:
-// `npx hardhat run scripts/example.js --network mainnet`
+// `npx hardhat run scripts/example.js --network ethereum`
 async function main() {
   // Ethereum Mainnet Deployment Addresses //
   // DataUtils: 0x2b7F44482BFaeAd1c86dA63aB458E15A2663836A

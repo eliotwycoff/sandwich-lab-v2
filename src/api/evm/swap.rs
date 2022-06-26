@@ -1,9 +1,80 @@
 use ethers::prelude::{ EthEvent, LogMeta };
-use ethers::types::{ Address, U64, U128, U256, I256, TxHash, Sign };
+use ethers::types::{ Address, U64, U128, U256, I256, TxHash, Sign, TransactionReceipt };
 use ethers::utils::{ hex, format_units };
 use ethers::core as ethers_core;
 use ethers::contract as ethers_contract;
+use super::super::models::Token;
 use std::convert::From;
+
+#[derive(Debug, Clone)]
+pub struct Swap<'a> {
+    pub swap: SwapCore,
+    pub tx: Option<TransactionReceipt>,
+    pub native_decimals: u8,
+    pub base: &'a Token,
+    pub quote: &'a Token
+}
+
+impl<'a> Swap<'a> {
+    pub fn add_tx_meta(&mut self, receipt: TransactionReceipt) {
+        self.tx = Some(receipt);
+    }
+
+    pub fn in0(&self) -> f64 {
+        self.swap.in0(self.base.decimals as u8)
+    }
+
+    pub fn in1(&self) -> f64 {
+        self.swap.in1(self.quote.decimals as u8)
+    }
+
+    pub fn out0(&self) -> f64 {
+        self.swap.out0(self.base.decimals as u8)
+    }
+
+    pub fn out1(&self) -> f64 {
+        self.swap.out1(self.quote.decimals as u8)
+    }
+
+    pub fn gas(&self) -> f64 {
+        let tx = match &self.tx {
+            Some(receipt) => receipt,
+            None => return 0f64
+        };
+
+        let gas_price = match tx.effective_gas_price {
+            Some(price) => price,
+            None => return 0f64
+        };
+
+        let gas_used = match tx.gas_used {
+            Some(amount) => amount,
+            None => return 0f64
+        };
+
+        match gas_price.checked_mul(gas_used) {
+            Some(value) => format_units(value, self.native_decimals as u32)
+                .unwrap_or("0.0".to_string()).parse::<f64>().unwrap(),
+            None => 0f64
+        }
+    }
+}
+
+// Wrap a `SwapCore` struct with token metadata.
+pub fn to_wrapped<'a>(
+    swap: SwapCore,
+    native_decimals: u8,
+    base: &'a Token,
+    quote: &'a Token
+) -> Swap<'a> {
+    Swap {
+        swap,
+        tx: None,
+        native_decimals,
+        base,
+        quote
+    }
+}
 
 #[derive(Clone, Debug, EthEvent)]
 #[ethevent(name = "Swap", abi = "Swap(address,uint,uint,uint,uint,address)")]
@@ -37,7 +108,8 @@ pub struct RawSwapV3 {
     pub tick: I256
 }
 
-pub struct Swap {
+#[derive(Debug, Clone, Eq, Ord, PartialEq, PartialOrd)]
+pub struct SwapCore {
     block_number: U64,
     pub tx_hash: TxHash,
     tx_index: U64,
@@ -47,7 +119,41 @@ pub struct Swap {
     out1: U256
 }
 
-impl From<(RawSwapV2, LogMeta)> for Swap {
+impl SwapCore {
+    pub fn block_number(&self) -> u64 {
+        self.block_number.as_u64()
+    }
+
+    pub fn tx_hash(&self) -> String {
+        hex::encode(self.tx_hash)
+    }
+
+    pub fn tx_index(&self) -> i32 {
+        self.tx_index.as_u32().try_into().unwrap_or(i32::MAX)
+    }
+
+    pub fn in0(&self, decimals: u8) -> f64 {
+        Self::u256_to_f64(self.in0, decimals)
+    }
+
+    pub fn in1(&self, decimals: u8) -> f64 {
+        Self::u256_to_f64(self.in1, decimals)
+    }
+
+    pub fn out0(&self, decimals: u8) -> f64 {
+        Self::u256_to_f64(self.out0, decimals)
+    }
+
+    pub fn out1(&self, decimals: u8) -> f64 {
+        Self::u256_to_f64(self.out1, decimals)
+    }
+
+    fn u256_to_f64(u256: U256, decimals: u8) -> f64 {
+        format_units(u256, decimals as u32).unwrap_or("0.0".to_string()).parse::<f64>().unwrap()
+    }
+}
+
+impl From<(RawSwapV2, LogMeta)> for SwapCore {
     fn from((swap, meta): (RawSwapV2, LogMeta)) -> Self {
         Self {
             block_number: meta.block_number,
@@ -61,7 +167,7 @@ impl From<(RawSwapV2, LogMeta)> for Swap {
     }
 }
 
-impl From<(RawSwapV3, LogMeta)> for Swap {
+impl From<(RawSwapV3, LogMeta)> for SwapCore {
     fn from((swap, meta): (RawSwapV3, LogMeta)) -> Self {
         let (in0, out0) = match swap.amount0.sign() {
             Sign::Positive => (swap.amount0.into_raw(), U256::zero()),
