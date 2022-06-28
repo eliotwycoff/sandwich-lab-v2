@@ -53,14 +53,16 @@ async fn inspect_pair(
     };
 
     let pair_address = info.pair.to_lowercase();
-    let api_url = req.url_for_static("fetch_pair").unwrap().to_string();
+    let api_pair_url = req.url_for_static("fetch_pair").unwrap().to_string();
+    let api_sandwich_url = req.url_for_static("fetch_sandwiches").unwrap().to_string();
 
     HttpResponse::Ok().body(templates::pair::render(
         &app_name,
         &blockchain.name,
         &blockchain_str_id,
         &pair_address,
-        &api_url,
+        &api_pair_url,
+        &api_sandwich_url,
         &home_url))
 } 
 

@@ -132,13 +132,13 @@ a {
     flex-direction: column;
 }
 
-.section-label {
+.card-label {
     color: white;
     background-color: black;
     padding: 0.4em;
 }
 
-.section-body {
+.card-body {
     padding: 0.4em;
 }
 

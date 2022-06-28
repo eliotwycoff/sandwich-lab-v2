@@ -10,7 +10,7 @@ use std::convert::From;
 #[derive(Debug, Deserialize)]
 struct SandwichesRequest {
     blockchain: String,
-    pair_address: String,
+    pair: String,
     before: Option<u64>
 }
 
@@ -99,7 +99,7 @@ async fn fetch_sandwiches(
 ) -> web::Json<SandwichesResponse> {
     // Standardize the incoming data.
     let blockchain_id = info.blockchain.to_lowercase();
-    let pair_address = info.pair_address.to_lowercase();
+    let pair_address = info.pair.to_lowercase();
 
     // First get the blockchain state data, or return an error.
     let blockchain = match data.blockchains.get(&blockchain_id) {

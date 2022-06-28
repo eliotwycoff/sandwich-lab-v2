@@ -7,7 +7,7 @@ use super::super::{ evm, db };
 #[derive(Debug, Deserialize)]
 struct PairRequest {
     blockchain: String,
-    pair_address: String
+    pair: String
 }
 
 #[derive(Debug, Serialize)]
@@ -54,7 +54,7 @@ async fn fetch_pair(
 
     // Standardize the incoming data.
     let blockchain_id = info.blockchain.to_lowercase();
-    let pair_address = info.pair_address.to_lowercase();
+    let pair_address = info.pair.to_lowercase();
 
     // First get the blockchain state data, or return an error.
     let blockchain = match data.blockchains.get(&blockchain_id) {
@@ -135,7 +135,7 @@ async fn fetch_pair(
         // There was an error fetching the pair, base and quote,
         // or at least one could not be found in the database,
         // so try to get this information from the blockchain.
-        let pair_address = info.pair_address.to_lowercase();
+        let pair_address = info.pair.to_lowercase();
 
         // Asynchronously get the pair metadata from the blockchain.
         let metadata = match evm::fetch_pair_metadata(

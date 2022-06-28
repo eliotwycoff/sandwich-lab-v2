@@ -30,8 +30,12 @@ macro_rules! try_or_log_error {
 #[macro_export]
 macro_rules! get_lower_bound {
     ($upper:expr, $size:expr, $min_lower:expr) => {
-        if $upper - $size > $min_lower { 
-            $upper - $size
+        if $upper > $size {
+            if $upper - $size > $min_lower { 
+                $upper - $size
+            } else {
+                $min_lower
+            }
         } else {
             $min_lower
         }
@@ -100,11 +104,11 @@ async fn run_scan_loop(
     let mut lower = get_lower_bound!(upper, blocks_per_chunk, range.lower_bound as u64);
 
     while upper >= range.lower_bound as u64 {
-        println!("Lower: {lower}\nUpper: {upper}\n Lower Bound: {}", range.lower_bound);
+        println!("\nLower: {lower}\nUpper: {upper}\nLower Bound: {}", range.lower_bound);
         let swaps = match exchange {
             Exchange::V2 { name: _ } => {
                 let raw_swaps: Vec<(RawSwapV2, LogMeta)> = contract.event()
-                    .from_block::<u64>(lower).to_block::<u64>(upper).query_with_meta().await?;
+                   .from_block::<u64>(lower).to_block::<u64>(upper).query_with_meta().await?;
 
                 raw_swaps.into_iter()
                     .map(|raw_swap| to_wrapped(
@@ -123,7 +127,7 @@ async fn run_scan_loop(
         };
 
         let total_swaps = swaps.len();
-        println!("Fetched {total_swaps} swaps!");
+        println!(" -- Fetched {total_swaps} swaps!");
 
         // Group swaps by block, and filter out blocks with less than three swaps.
         let mut swaps_per_block: HashMap<u64, u64> = HashMap::new();
@@ -140,7 +144,7 @@ async fn run_scan_loop(
             }
         }
 
-        println!("A total of {} blocks have 3 or more swaps.", swaps_by_block.len());
+        println!(" -- A total of {} blocks have 3 or more swaps.", swaps_by_block.len());
 
         // Look for and save any sandwich trades in blocks with at least three swaps. 
         for block in swaps_by_block.keys() {
