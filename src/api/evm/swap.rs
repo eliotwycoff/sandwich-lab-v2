@@ -1,5 +1,5 @@
 use ethers::prelude::{ EthEvent, LogMeta };
-use ethers::types::{ Address, U64, U128, U256, I256, TxHash, Sign, TransactionReceipt };
+use ethers::types::{ Address, U64, U128, U256, I256, TxHash, Sign, Transaction, TransactionReceipt };
 use ethers::utils::{ hex, format_units };
 use ethers::core as ethers_core;
 use ethers::contract as ethers_contract;
@@ -9,15 +9,20 @@ use std::convert::From;
 #[derive(Debug, Clone)]
 pub struct Swap<'a> {
     pub swap: SwapCore,
-    pub tx: Option<TransactionReceipt>,
+    pub transaction: Option<Transaction>,
+    pub receipt: Option<TransactionReceipt>,
     pub native_decimals: u8,
     pub base: &'a Token,
     pub quote: &'a Token
 }
 
 impl<'a> Swap<'a> {
-    pub fn add_tx_meta(&mut self, receipt: TransactionReceipt) {
-        self.tx = Some(receipt);
+    pub fn add_transaction_meta(&mut self, transaction: Transaction) {
+        self.transaction = Some(transaction);
+    }
+
+    pub fn add_receipt_meta(&mut self, receipt: TransactionReceipt) {
+        self.receipt = Some(receipt);
     }
 
     pub fn in0(&self) -> f64 {
@@ -37,17 +42,22 @@ impl<'a> Swap<'a> {
     }
 
     pub fn gas(&self) -> f64 {
-        let tx = match &self.tx {
-            Some(receipt) => receipt,
+        let transaction = match &self.transaction {
+            Some(transaction) => transaction,
             None => return 0f64
         };
 
-        let gas_price = match tx.effective_gas_price {
+        let gas_price = match transaction.gas_price {
             Some(price) => price,
             None => return 0f64
         };
 
-        let gas_used = match tx.gas_used {
+        let receipt = match &self.receipt {
+            Some(receipt) => receipt,
+            None => return 0f64
+        };
+
+        let gas_used = match receipt.gas_used {
             Some(amount) => amount,
             None => return 0f64
         };
@@ -69,7 +79,8 @@ pub fn to_wrapped<'a>(
 ) -> Swap<'a> {
     Swap {
         swap,
-        tx: None,
+        transaction: None,
+        receipt: None,
         native_decimals,
         base,
         quote

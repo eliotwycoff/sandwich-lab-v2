@@ -23,7 +23,7 @@ pub fn render(
 ) -> String {
 
     let head_content = r##"
-    
+
     "##;
 
     let inner_content = r##"
@@ -31,8 +31,9 @@ pub fn render(
         <p>⇦ <a href={{home_url}} title="Home">Inspect a Different Pair</a></p>
         <section id="pair-metadata" class="card col">
             <div class="card-label">
-                <span>Pair {{pair_address}} on </span>
-                <span class="strong"> {{blockchain_name}}</span>
+                <span class="strong">Pair </span>
+                <span>{{pair_address}} on </span>
+                <span class="card-label__blockchain strong"> {{blockchain_name}}</span>
                 <span id="card-label__exchange"></span>
             </div>
             <div class="card-body">
@@ -41,7 +42,7 @@ pub fn render(
             </div>
         </section>
         <section id="sandwiches" class="col">
-
+            
         </section>
     "##;
 
@@ -57,7 +58,7 @@ pub fn render(
         const data = await response.json();
 
         // Set the exchange name.
-        setElement("section-label__exchange", (element) => {
+        setElement("card-label__exchange", (element) => {
             element.textContent = `(${data.pair.exchange_name})`;
         });
         

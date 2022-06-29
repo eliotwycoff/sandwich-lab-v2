@@ -4,6 +4,27 @@ use std::fmt;
 use tokio;
 
 // This helper macro spawns a new tokio task to fetch
+// a transaction for the given transaction hash,
+// and it returns a handle to the future.
+#[macro_export]
+macro_rules! get_transaction_handle {
+    ($provider_url:expr, $tx_hash:expr) => {
+        tokio::spawn(async move {
+            match Provider::<Http>::try_from($provider_url) {
+                Ok(provider) => {
+                    match provider.get_transaction($tx_hash).await {
+                        Ok(Some(transaction)) => Ok(transaction),
+                        Ok(None) => Err(SandwichError::NoTransaction),
+                        Err(_) => Err(SandwichError::ProviderError)
+                    }
+                },
+                Err(_) => Err(SandwichError::ParseError)
+            }
+        })
+    }
+}
+
+// This helper macro spawns a new tokio task to fetch
 // a transaction receipt for the given transaction hash,
 // and it returns a handle to the future.
 #[macro_export]
@@ -37,41 +58,70 @@ impl<'a> Sandwich<'a> {
         &mut self,
         provider_url: &str
     ) -> Result<(), SandwichError> {
-        // Create a vec to hold all the transaction handles.
-        let mut handles = Vec::with_capacity(self.lunchmeat.len() + 2);
+        // Create vecs to hold all the transaction and receipt handles.
+        let mut tx_handles = Vec::with_capacity(self.lunchmeat.len() + 2);
+        let mut receipt_handles = Vec::with_capacity(self.lunchmeat.len() + 2);
 
-        // Get the tx receipt handle for the frontrun transaction.
+        // Get the tx and receipt handles for the frontrun transaction.
         let provider_url_copy = provider_url.to_string();
         let tx_hash = self.frontrun.swap.tx_hash.clone();
-        handles.push(get_receipt_handle!(provider_url_copy, tx_hash));
+        tx_handles.push(get_transaction_handle!(provider_url_copy, tx_hash));
 
-        // Get the tx receipt handles for all the lunchmeat transactions.
+        let provider_url_copy = provider_url.to_string();
+        let tx_hash = self.frontrun.swap.tx_hash.clone();
+        receipt_handles.push(get_receipt_handle!(provider_url_copy, tx_hash));
+
+        // Get the tx and receipt handles for all the lunchmeat transactions.
         for i in 0..self.lunchmeat.len() {
             let provider_url_copy = provider_url.to_string();
             let tx_hash = self.lunchmeat[i].swap.tx_hash.clone();
-            handles.push(get_receipt_handle!(provider_url_copy, tx_hash));
+            tx_handles.push(get_transaction_handle!(provider_url_copy, tx_hash));
+
+            let provider_url_copy = provider_url.to_string();
+            let tx_hash = self.lunchmeat[i].swap.tx_hash.clone();
+            receipt_handles.push(get_receipt_handle!(provider_url_copy, tx_hash));
         }
 
-        // Get the tx receipt handle for the backrun transaction.
+        // Get the tx and receipt handle for the backrun transaction.
         let provider_url_copy = provider_url.to_string();
         let tx_hash = self.backrun.swap.tx_hash.clone();
-        handles.push(get_receipt_handle!(provider_url_copy, tx_hash));
+        tx_handles.push(get_transaction_handle!(provider_url_copy, tx_hash));
 
-        // Create a vec to hold all the transaction receipts.
-        let mut receipts = Vec::with_capacity(handles.len());
+        let provider_url_copy = provider_url.to_string();
+        let tx_hash = self.backrun.swap.tx_hash.clone();
+        receipt_handles.push(get_receipt_handle!(provider_url_copy, tx_hash));
 
-        for handle in handles {
-            receipts.push(handle.await??);
+        // Create a vec to hold all the transactions and receipts.
+        let mut transactions = Vec::with_capacity(tx_handles.len());
+        let mut receipts = Vec::with_capacity(receipt_handles.len());
+
+        for tx_handle in tx_handles {
+            transactions.push(tx_handle.await??);
+        }
+
+        for receipt_handle in receipt_handles {
+            receipts.push(receipt_handle.await??);
+        }
+
+        // Clone the transactions back into the Swap structs.
+        for i in 0..transactions.len() {
+            if i == 0 {
+                self.frontrun.add_transaction_meta(transactions[i].clone());
+            } else if i < transactions.len() - 1 {
+                self.lunchmeat[i-1].add_transaction_meta(transactions[i].clone());
+            } else {
+                self.backrun.add_transaction_meta(transactions[i].clone());
+            }
         }
 
         // Clone the receipts back into the Swap structs.
         for i in 0..receipts.len() {
             if i == 0 {
-                self.frontrun.add_tx_meta(receipts[i].clone());
+                self.frontrun.add_receipt_meta(receipts[i].clone());
             } else if i < receipts.len() - 1 {
-                self.lunchmeat[i-1].add_tx_meta(receipts[i].clone());
+                self.lunchmeat[i-1].add_receipt_meta(receipts[i].clone());
             } else {
-                self.backrun.add_tx_meta(receipts[i].clone());
+                self.backrun.add_receipt_meta(receipts[i].clone());
             }
         }
 
@@ -135,7 +185,7 @@ fn is_match(a: &Swap, b: &Swap) -> bool {
         return false;
     }
 
-    let tol = 1.01;
+    let tol = 1.005;
 
     let base_ratio = a.swap.in0(a.base.decimals as u8) / b.swap.out0(b.base.decimals as u8);
     let quote_ratio = a.swap.in1(a.quote.decimals as u8) / b.swap.out1(b.quote.decimals as u8);
@@ -152,6 +202,7 @@ fn is_match(a: &Swap, b: &Swap) -> bool {
 }
 
 pub enum SandwichError {
+    NoTransaction,
     NoReceipt,
     ProviderError,
     ParseError,
@@ -161,6 +212,7 @@ pub enum SandwichError {
 impl SandwichError {
     fn message(&self) -> &str {
         match self {
+            Self::NoTransaction => "no transaction was returned from the provider",
             Self::NoReceipt => "no receipt was returned from the provider",
             Self::ProviderError => "the provider returned with an error",
             Self::ParseError => "could not parse the provider url",

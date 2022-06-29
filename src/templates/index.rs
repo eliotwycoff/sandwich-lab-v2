@@ -54,7 +54,7 @@ pub fn render(
             <button 
                 type="submit" 
                 id="pair-button" 
-                class="options__button">Search for Sandwiches</button>
+                class="options__button button">Search for Sandwiches</button>
         </form>
     "##;
 

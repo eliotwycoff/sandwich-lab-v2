@@ -2,11 +2,27 @@
     box-sizing: border-box;
 }
 
+:root {
+    --primary-ultralight: #eaf2f8;
+    --primary-light: #d4e6f1;
+    --primary: #1f618d;
+    --primary-dark: #154360;
+    --text: #1b2631;
+    --highlight-light: #f9e79f;
+    --highlight: #f1c40f;
+    --highlight-dark: #9a7d0a;
+    --positive: #27ae60;
+    --negative: #a93226;
+    --shadow-light: lightgray;
+    --shadow: darkgray;
+}
+
 html, body {
     margin: 0;
     padding: 0;
     font-family: 'Dosis', sans-serif;
     font-weight: 400;
+    color: var(--text);
 }
 
 ul {
@@ -15,16 +31,28 @@ ul {
 }
 
 a {
-    color: black;
+    color: var(--text);
 }
 
 .strong {
     font-weight: 600;
 }
 
+.button {
+    font-family: 'Dosis', sans-serif;
+    font-weight: 400;
+    padding: 0.5rem 1rem;
+    margin: 0.8em 0 0 0;
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: -1px 1px 3px 1px var(--shadow-light);
+    transition-duration: 100ms;
+}
+
 .page-title {
     text-align: center;
     font-family: 'Special Elite', cursive;
+    color: var(--primary-dark);
 }
 
 .page-title, .placeholder--title {
@@ -68,8 +96,8 @@ a {
 }
 
 .options__item__input:checked + .options__item__label {
-    background-color: gainsboro;
-    box-shadow: -1px 1px 5px 1px darkgray;
+    background-color: var(--primary-light);
+    box-shadow: -1px 1px 3px 1px var(--shadow);
 }
 
 .options__item__label {
@@ -78,13 +106,14 @@ a {
     font-weight: 600;
     padding: 0.5rem;
     cursor: pointer;
-    border: 2px solid black;
-    box-shadow: -1px 1px 5px 1px gainsboro;
+    border: 2px solid var(--primary-dark);
+    border-radius: 0.5rem;
+    box-shadow: -1px 1px 3px 1px var(--shadow-light);
     transition-duration: 100ms;
 }
 
 .options__item__label:hover {
-    background-color: gainsboro;
+    background-color: var(--primary-light);
 }
 
 .options__pair__address {
@@ -92,7 +121,7 @@ a {
     padding: 0.75em 0.5em;
     margin: 0 0 1em 0;
     width: 50%;
-    border: 1px solid gainsboro;
+    border: 1px solid var(--primary-light);
     border-radius: 0.25em;
 }
 
@@ -101,30 +130,25 @@ a {
 }
 
 .options__button {
-    font-family: 'Dosis', sans-serif;
-    font-weight: 400;
     color: white;
-    background-color: gainsboro;
-    padding: 0.5rem 1rem;
-    margin: 0.8em 0 0 0;
-    border: none;
-    border-radius: 0;
-    box-shadow: -1px 1px 5px 1px gainsboro;
-    transition-duration: 100ms;
+    background-color: var(--primary-light);
 }
 
 .options:valid .options__button {
     cursor: pointer;
-    background-color: black;
+    color: var(--text);
+    background-color: var(--highlight);
 }
 
 .options:valid .options__button:hover {
-    box-shadow: -1px 1px 5px 1px darkgray;
+    box-shadow: -1px 1px 3px 1px var(--shadow);
 }
 
 .card {
-    border: 2px solid black;
-    box-shadow: -1px 1px 5px 1px gainsboro;
+    border: 2px solid var(--primary-dark);
+    border-radius: 0.5rem;
+    box-shadow: -1px 1px 3px 1px var(--shadow);
+    overflow: hidden;
 }
 
 .col {
@@ -132,9 +156,14 @@ a {
     flex-direction: column;
 }
 
+.row {
+    display: flex;
+    justify-content: space-between;
+}
+
 .card-label {
-    color: white;
-    background-color: black;
+    color: var(--primary-ultralight);
+    background-color: var(--primary-dark);
     padding: 0.4em;
 }
 
@@ -142,8 +171,13 @@ a {
     padding: 0.4em;
 }
 
+.card-footer {
+    background-color: var(--primary-ultralight);
+    padding: 0.4em;
+}
+
 .placeholder {
-    background-color: gainsboro;
+    background-color: var(--primary-light);
     border-radius: 0.65em;
 
     animation-duration: 1.65s;
@@ -163,6 +197,81 @@ a {
 .placeholder--text {
     width: 100%;
     height: 1.28em;
+}
+
+.sandwiches__element {
+    margin-bottom: 1rem;
+}
+
+.sandwiches__element__label {
+    font-weight: 600;
+    text-align: center;
+}
+
+.swap + .swap {
+    margin: 0.5rem 0 0 0;
+}
+
+.swap__text, .revenue__text {
+    margin: 0.25rem 0.25rem;
+}
+
+.swap__title {
+    font-weight: 600;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.swap__io__base-text, .swap__io__quote-text {
+    font-weight: 600;
+}
+
+.swap__io__base-text {
+    color: var(--primary);
+}
+
+.swap__io__quote-text {
+    color: var(--highlight-dark);
+}
+
+.swap__io__arrow {
+    color: var(--primary);
+}
+
+.revenue__title {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.negative {
+    color: var(--negative);
+}
+
+.positive {
+    color: var(--text);
+}
+
+.page-nav {
+    margin: 0 0 3em 0;
+    padding: 0.4em;
+    align-items: center;
+}
+
+.page-nav__button {
+    margin: 0;
+    cursor: pointer;
+}
+
+.page-nav__button:hover {
+    box-shadow: -1px 1px 3px 1px var(--shadow);
+}
+
+.page-nav__prev-button {
+    background-color: var(--primary-light);
+}
+
+.page-nav__next-button {
+    background-color: var(--highlight);
 }
 
 @keyframes animatePlaceholder {

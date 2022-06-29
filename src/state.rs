@@ -61,7 +61,7 @@ pub fn init_app_state() -> Data<AppState> {
 // (Consider pushing this data into the database in the future.)
 fn init_blockchains() -> HashMap<String, Blockchain> {
     HashMap::from([ 
-        (
+        /*(
             "arbitrum".to_string(),
             Blockchain {
                 name: "Arbitrum".to_string(),
@@ -130,7 +130,7 @@ fn init_blockchains() -> HashMap<String, Blockchain> {
                     decimals: 18
                 }
             }
-        ),
+        ),*/
         (
             "ethereum".to_string(), 
             Blockchain { 
@@ -200,7 +200,7 @@ fn init_blockchains() -> HashMap<String, Blockchain> {
                     decimals: 18
                 }
             }
-        ),
+        )/*,
         (
             "moonbeam".to_string(),
             Blockchain {
@@ -358,6 +358,6 @@ fn init_blockchains() -> HashMap<String, Blockchain> {
                     decimals: 18
                 }
             }
-        )
+        )*/
     ])
 }
