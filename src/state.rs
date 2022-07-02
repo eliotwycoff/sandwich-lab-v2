@@ -349,7 +349,7 @@ fn init_blockchains() -> HashMap<String, Blockchain> {
                 scanner_params: Params {
                     blocks_per_chunk: 1_000,
                     max_blocks_per_chunk: 10_000,
-                    target_swaps_per_chunk: 300,
+                    target_swaps_per_chunk: 1_000,
                     max_blocks_per_request: 100_000
                 },
                 native_token: NativeToken {

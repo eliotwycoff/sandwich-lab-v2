@@ -22,7 +22,16 @@ pub type DbConnection = r2d2::PooledConnection<ConnectionManager<PgConnection>>;
 pub fn init_db_pool() -> Pool {
     let db_url = env::var("DATABASE_URL").expect("DATABASE_URL environment variable not found");
     let manager = ConnectionManager::<PgConnection>::new(db_url);
-    Pool::new(manager).expect("error creating db pool")
+    let pool = Pool::new(manager).expect("error creating db pool");
+
+    // Run any pending migrations.
+    embed_migrations!();
+    embedded_migrations::run(&pool.get()
+        .expect("error getting database connection"))
+        .expect("error running pending migrations");
+
+    // Return the database pool.
+    pool
 }
 
 // Fetch the token with the given parameters,

@@ -1,4 +1,5 @@
 #[macro_use] extern crate diesel;
+#[macro_use] extern crate diesel_migrations;
 
 use actix_web::{ middleware, App, HttpServer };
 use actix_files::Files;
