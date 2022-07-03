@@ -4,6 +4,7 @@
 use actix_web::{ middleware, App, HttpServer };
 use actix_files::Files;
 use dotenv::dotenv;
+use std::env;
 pub use state::{ AppState, init_app_state };
 
 mod api;
@@ -29,7 +30,7 @@ async fn main() -> std::io::Result<()> {
             .configure(api::routes)
             .configure(app::routes)
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(env::var("SOCKET").expect("SOCKET environment variable not found"))?
     .run()
     .await
 }
