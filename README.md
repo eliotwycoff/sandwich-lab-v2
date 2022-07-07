@@ -24,10 +24,10 @@ Alternatively, you can just play with the live demo currently hosted at http://s
 ## Sample LP Pair Addresses
 Here are some Ethereum pair addresses on Uniswap (V2 and V3) that should turn up a good number of sandwich trades:
 
-WBTC-WETH: 0xcbcdf9626bc03e24f779434178a73a0b4bad62ed
-APE-WETH: 0xac4b3dacb91461209ae9d41ec517c2b9cb1b7daf
-FXS-FRAX: 0xe1573b9d29e2183b1af0e743dc2754979a40d237
-UNI-WETH: 0xd3d2e2692501a5c9ca623199d38826e513033a17
-ELON-WETH: 0x7b73644935b8e68019ac6356c40661e1bc315860
+WBTC-WETH: `0xcbcdf9626bc03e24f779434178a73a0b4bad62ed`
+APE-WETH: `0xac4b3dacb91461209ae9d41ec517c2b9cb1b7daf`
+FXS-FRAX: `0xe1573b9d29e2183b1af0e743dc2754979a40d237`
+UNI-WETH: `0xd3d2e2692501a5c9ca623199d38826e513033a17`
+ELON-WETH: `0x7b73644935b8e68019ac6356c40661e1bc315860`
 
 You can also pull pair addresses from the analytics pages of Uniswap (V2 and V3) and Sushiswap. Note that pairs with little trading activity are unlikely to have any recent sandwich trades.
