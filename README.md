@@ -18,9 +18,6 @@ Finally, you will need a socket address for the app to bind to, e.g.:
 
 Once your .env is setup, you just need to run `cargo run`.
 
-## Live Demo
-Alternatively, you can just play with the live demo currently hosted at http://sandwich-lab.io:8000/. Please note that I have not installed an SSL certificate, so ignore any warnings about the site being unsafe.
-
 ## Sample LP Pair Addresses
 Here are some Ethereum pair addresses on Uniswap (V2 and V3) that should turn up a good number of sandwich trades:
 
